@@ -1,6 +1,8 @@
 package com.bedihospital.bedihospital;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -12,25 +14,36 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    LinearLayout bookAppointment, findDoctor, healthOffers, emergencyCall;
+    String APPOINTMENT = "Book An Appointment";
+    String HEALTHOFFERS = "Health Offers";
+    String FINDDOCTOR = "Find A Doctor";
+    String EMERGENCYCALL = "Emergency Call";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Bedi Hospital");
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        bookAppointment = (LinearLayout)findViewById(R.id.MainBookAppointment);
+        findDoctor = (LinearLayout)findViewById(R.id.MainFindADoctor);
+        healthOffers = (LinearLayout)findViewById(R.id.MainHealthOffers);
+        emergencyCall = (LinearLayout)findViewById(R.id.MainEmergencyCall);
+
+        clickEvent(bookAppointment,APPOINTMENT);
+        clickEvent(healthOffers, HEALTHOFFERS);
+        clickEvent(findDoctor, FINDDOCTOR);
+        clickEvent(emergencyCall, EMERGENCYCALL);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -80,13 +93,26 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_book_appointment) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+            Intent intent = new Intent(MainActivity.this,CommonSearchActivity.class);
+            intent.putExtra("message",APPOINTMENT);
+            startActivity(intent);
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_find_a_doctor) {
+            Intent intent = new Intent(MainActivity.this,CommonSearchActivity.class);
+            intent.putExtra("message",FINDDOCTOR);
+            startActivity(intent);
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_health_offers) {
+            Intent intent = new Intent(MainActivity.this,CommonSearchActivity.class);
+            intent.putExtra("message",HEALTHOFFERS);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_call) {
+            Intent intent = new Intent(MainActivity.this,CommonSearchActivity.class);
+            intent.putExtra("message",EMERGENCYCALL);
+            startActivity(intent);
 
         } else if (id == R.id.nav_share) {
 
@@ -97,5 +123,19 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+//    on click event handling via a function
+    public void clickEvent(LinearLayout linearLayout, final String value) {
+
+      linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Toast.makeText(MainActivity.this, "Appointment", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this,CommonSearchActivity.class);
+                intent.putExtra("message",value);
+                startActivity(intent);
+            }
+        });
     }
 }

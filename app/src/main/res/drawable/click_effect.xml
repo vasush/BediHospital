@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--this is designed to give a ripple effect on click of a view-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:state_selected="true"
+        android:drawable="@color/dark_green" ></item> <!-- pressed -->
+    <item
+        android:state_pressed="true"
+        android:drawable="@color/dark_green" ></item> <!-- focused -->
+    <item
+        android:drawable="@android:color/transparent" /> <!-- default -->
+</selector>
