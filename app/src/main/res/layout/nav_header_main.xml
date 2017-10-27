@@ -12,7 +12,6 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
-        android:scaleType="centerCrop"
         android:layout_height="wrap_content"
         android:background="@drawable/custom_border"
         android:src="@drawable/bedi_logo" />

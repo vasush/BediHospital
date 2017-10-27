@@ -13,12 +13,14 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:id="@+id/commonImage"
+        android:src="@drawable/ic_book_appointment"
         android:layout_marginLeft="120dp"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:gravity="center"
+        android:text="Select the fields below to schedule your Doctor appointment."
         android:textSize="20sp"
         android:textColor="@android:color/black"
         android:id="@+id/commonText"/>
@@ -53,8 +55,9 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:text="SEARCH"
+
         android:layout_marginTop="40dp"
         android:textSize="18sp"
-        android:background="@drawable/custom_border"
-        android:textColor="@color/colorPrimary"/>
+        android:background="@drawable/button_border"
+        android:textColor="@android:color/white"/>
 </LinearLayout>

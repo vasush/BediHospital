@@ -1,69 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
+    android:layout_height="match_parent"
     android:background="@color/grey"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <ImageView
+        android:id="@+id/commonImage"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:id="@+id/commonImage"
+        android:layout_marginLeft="120dp"
         android:layout_marginTop="20dp"
-        android:src="@drawable/ic_call"
-        android:layout_marginLeft="120dp"/>
+        android:src="@drawable/ic_call" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
         android:gravity="center"
         android:text="Bedi Hospital(Mother and Child Care)"
         android:textColor="@color/colorPrimary"
-        />
+        android:textSize="20sp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:orientation="vertical"
-        android:padding="16dp"
+        android:layout_marginTop="20dp"
         android:background="@drawable/custom_border"
-        android:layout_marginTop="20dp">
-        <TextView
-            android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:id="@+id/ambulance"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="AMBULANCE"
             android:layout_marginTop="10dp"
-            android:textSize="18sp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="091118-91118"
-            android:textColor="@color/colorPrimary"/>
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:text="HELPLINE"
-            android:textSize="18sp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0172-2668111"
-            android:textColor="@color/colorPrimary"/>
+            <LinearLayout
+                android:layout_width="60dp"
+                android:layout_height="match_parent">
 
-        <TextView
-            android:layout_width="wrap_content"
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/content_main_border"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_call" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AMBULANCE"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="091118-91118"
+                    android:textColor="@color/colorPrimary" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="350dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="15dp"
+            android:background="@color/grey"></View>
+
+        <LinearLayout
+            android:id="@+id/helpLine"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:text="BLOOD BANK"
-            android:textSize="18sp"/>
-        <TextView
-            android:layout_width="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="60dp"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/content_main_border"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_call" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HELPLINE"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="091118-91118"
+                    android:textColor="@color/colorPrimary" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="350dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="22dp"
+            android:background="@color/grey"></View>
+
+        <LinearLayout
+            android:id="@+id/bloodBank"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="091118-91118"
-            android:textColor="@color/colorPrimary"/>
+            android:layout_marginTop="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="60dp"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/content_main_border"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_call" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BLOODBANK"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="091118-91118"
+                    android:textColor="@color/colorPrimary" />
+            </LinearLayout>
+        </LinearLayout>
+
 
     </LinearLayout>
 

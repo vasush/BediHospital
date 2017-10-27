@@ -1,10 +1,14 @@
 package com.bedihospital.bedihospital;
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,10 +25,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     LinearLayout bookAppointment, findDoctor, healthOffers, emergencyCall;
-    String APPOINTMENT = "Book An Appointment";
-    String HEALTHOFFERS = "Health Offers";
-    String FINDDOCTOR = "Find A Doctor";
-    String EMERGENCYCALL = "Emergency Call";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,18 +34,19 @@ public class MainActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Bedi Hospital");
 
+        //fetching linear layouts
         bookAppointment = (LinearLayout)findViewById(R.id.MainBookAppointment);
         findDoctor = (LinearLayout)findViewById(R.id.MainFindADoctor);
         healthOffers = (LinearLayout)findViewById(R.id.MainHealthOffers);
         emergencyCall = (LinearLayout)findViewById(R.id.MainEmergencyCall);
 
-        clickEvent(bookAppointment,APPOINTMENT);
-        clickEvent(healthOffers, HEALTHOFFERS);
-        clickEvent(findDoctor, FINDDOCTOR);
-        clickEvent(emergencyCall, EMERGENCYCALL);
+//        clickEvent(bookAppointment,BookAppointment.class);
+//        clickEvent(healthOffers, HealthOffers.class);
+//        clickEvent(findDoctor, FindDoctor.class);
+//        clickEvent(emergencyCall, EmergencyCall.class);
 
+        //navigation drawer fetch
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -54,17 +56,26 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
     }
-
+//physical back button control
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+
+        // for replacing the last fragment on back press
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStack();
         } else {
             super.onBackPressed();
         }
-    }
 
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        }
+//        else {
+//            super.onBackPressed();
+//        }
+    }
+//inflating menu item at top right corner
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -80,11 +91,50 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.signUp) {
+            startActivity(new Intent(this,LoginActivity.class));
+        }
+        else if(id == R.id.signIn) {
+            startActivity(new Intent(this,LoginActivity.class));
         }
 
         return super.onOptionsItemSelected(item);
+    }
+//loading the fragments when items are clicked
+    private void displaySelectedScreen(int id) {
+        Fragment fragment = null;
+        String title = "";
+
+        switch (id) {
+            case R.id.nav_book_appointment:
+                fragment = new BookAppointment();
+                title = "Book Appointment";
+                break;
+            case R.id.nav_find_a_doctor:
+                fragment = new FindDoctor();
+                title = "Find A Doctor";
+                break;
+            case R.id.nav_health_offers:
+                fragment = new HealthOffers();
+                title = "Health Offers";
+                break;
+            case R.id.nav_call:
+                fragment = new EmergencyCall();
+                title = "Emergency Numbers";
+                break;
+        }
+//relacing the fragments
+        if(fragment != null) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.content_main, fragment);
+            getSupportActionBar().setTitle(title);
+            ft.addToBackStack("home");
+            ft.commit();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -93,49 +143,35 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_book_appointment) {
-            // Handle the camera action
-            Intent intent = new Intent(MainActivity.this,CommonSearchActivity.class);
-            intent.putExtra("message",APPOINTMENT);
-            startActivity(intent);
+        if(id == R.id.nav_share) {
 
-        } else if (id == R.id.nav_find_a_doctor) {
-            Intent intent = new Intent(MainActivity.this,CommonSearchActivity.class);
-            intent.putExtra("message",FINDDOCTOR);
-            startActivity(intent);
-
-        } else if (id == R.id.nav_health_offers) {
-            Intent intent = new Intent(MainActivity.this,CommonSearchActivity.class);
-            intent.putExtra("message",HEALTHOFFERS);
-            startActivity(intent);
-
-        } else if (id == R.id.nav_call) {
-            Intent intent = new Intent(MainActivity.this,CommonSearchActivity.class);
-            intent.putExtra("message",EMERGENCYCALL);
-            startActivity(intent);
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+            //sharing the app
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            String link = "https://play.google.com/store?hl=en";
+            intent.putExtra(Intent.EXTRA_TEXT,link);
+            startActivity(Intent.createChooser(intent,"Share using"));
         }
+        //calling method to change the layout on click of an item in navigation drawer
+        displaySelectedScreen(id);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
 //    on click event handling via a function
-    public void clickEvent(LinearLayout linearLayout, final String value) {
+    public void clickEvent(LinearLayout linearLayout, final Class nextClass) {
 
       linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Toast.makeText(MainActivity.this, "Appointment", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MainActivity.this,CommonSearchActivity.class);
-                intent.putExtra("message",value);
+                Intent intent = new Intent(MainActivity.this,nextClass);
+                //intent.putExtra("message",value);
                 startActivity(intent);
+
             }
         });
     }
+
+
 }
