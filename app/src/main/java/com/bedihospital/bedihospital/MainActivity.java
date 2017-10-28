@@ -1,15 +1,9 @@
 package com.bedihospital.bedihospital;
 
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.LayoutRes;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -18,13 +12,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    LinearLayout bookAppointment, findDoctor, healthOffers, emergencyCall;
+
 
 
     @Override
@@ -35,16 +27,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //fetching linear layouts
-        bookAppointment = (LinearLayout)findViewById(R.id.MainBookAppointment);
-        findDoctor = (LinearLayout)findViewById(R.id.MainFindADoctor);
-        healthOffers = (LinearLayout)findViewById(R.id.MainHealthOffers);
-        emergencyCall = (LinearLayout)findViewById(R.id.MainEmergencyCall);
 
-//        clickEvent(bookAppointment,BookAppointment.class);
-//        clickEvent(healthOffers, HealthOffers.class);
-//        clickEvent(findDoctor, FindDoctor.class);
-//        clickEvent(emergencyCall, EmergencyCall.class);
 
         //navigation drawer fetch
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -75,31 +58,7 @@ public class MainActivity extends AppCompatActivity
 //            super.onBackPressed();
 //        }
     }
-//inflating menu item at top right corner
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.signUp) {
-            startActivity(new Intent(this,LoginActivity.class));
-        }
-        else if(id == R.id.signIn) {
-            startActivity(new Intent(this,LoginActivity.class));
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 //loading the fragments when items are clicked
     private void displaySelectedScreen(int id) {
         Fragment fragment = null;
@@ -150,28 +109,12 @@ public class MainActivity extends AppCompatActivity
             intent.setType("text/plain");
             String link = "https://play.google.com/store?hl=en";
             intent.putExtra(Intent.EXTRA_TEXT,link);
-            startActivity(Intent.createChooser(intent,"Share using"));
+            startActivity(Intent.createChooser(intent,"Share via"));
         }
         //calling method to change the layout on click of an item in navigation drawer
         displaySelectedScreen(id);
 
         return true;
     }
-
-//    on click event handling via a function
-    public void clickEvent(LinearLayout linearLayout, final Class nextClass) {
-
-      linearLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Toast.makeText(MainActivity.this, "Appointment", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MainActivity.this,nextClass);
-                //intent.putExtra("message",value);
-                startActivity(intent);
-
-            }
-        });
-    }
-
-
 }
+

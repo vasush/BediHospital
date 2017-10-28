@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1063358674574",
+    "firebase_url": "https://bedi-hospital.firebaseio.com",
+    "project_id": "bedi-hospital",
+    "storage_bucket": "bedi-hospital.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1063358674574:android:99b47a38e883d73b",
+        "android_client_info": {
+          "package_name": "com.bedihospital.bedihospital"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1063358674574-k4su2hluu0semk06fv1ic4lqdv7frh57.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bedihospital.bedihospital",
+            "certificate_hash": "bcb96fcce1b5778c27f87074c73b35d572f6c2f0"
+          }
+        },
+        {
+          "client_id": "1063358674574-4rohe7a9239pmbm9f1r3s5v35h0p21ju.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdRzz-_wdho3O9R0KfKZ63xnDtJ_ta35o"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1063358674574-4rohe7a9239pmbm9f1r3s5v35h0p21ju.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
