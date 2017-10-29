@@ -7,7 +7,7 @@ import com.firebase.client.Firebase;
 /**
  * Created by Vasu on 28-Oct-17.
  */
-
+// connection with firebase
 public class BediHospital extends Application {
 
     @Override

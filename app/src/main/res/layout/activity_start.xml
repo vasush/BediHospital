@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content">
 
                 <AutoCompleteTextView
-                    android:id="@+id/email"
+                    android:id="@+id/loginEmail"
                     android:layout_width="300dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/password"
+                    android:id="@+id/loginPassword"
                     android:layout_width="300dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -81,13 +81,13 @@
             </android.support.design.widget.TextInputLayout>
 
             <Button
-                android:id="@+id/loginButton"
+                android:id="@+id/login_registerButton"
                 style="?android:textAppearanceSmall"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/button_border"
-                android:text="Login"
+                android:text="Login/Register"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="17sp" />
@@ -95,34 +95,11 @@
 
         </LinearLayout>
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Not a member?"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/register"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Register"
-                android:textColor="@color/blue"
-                android:textSize="16sp" />
-        </LinearLayout>
-
         <TextView
             android:id="@+id/skipExplore"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="20dp"
             android:gravity="center"
             android:text="SKIP and EXPLORE" />
 
