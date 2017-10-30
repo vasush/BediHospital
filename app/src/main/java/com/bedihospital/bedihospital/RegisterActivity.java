@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.View.OnClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bedihospital.bedihospital.Model.User;
@@ -45,6 +47,8 @@ public class RegisterActivity extends AppCompatActivity {
     // firebase authentication
     private FirebaseAuth mAuth;
 
+    LinearLayout registerLinearLayout;
+
     //[START declare_database_ref]
     private DatabaseReference mDatabaseRefrence;
 
@@ -69,6 +73,7 @@ public class RegisterActivity extends AppCompatActivity {
         mNamefield = (EditText) findViewById(R.id.registerName);
         mContactField = (EditText) findViewById(R.id.registerContact);
         registerButton = (Button) findViewById(R.id.registerButton);
+        registerLinearLayout = (LinearLayout)findViewById(R.id.registerLineraLayout);
 
 
         mAuth = FirebaseAuth.getInstance();
@@ -127,26 +132,29 @@ public class RegisterActivity extends AppCompatActivity {
 
     // adding details to firebase database
     private void addToDatabase() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        final String userID = user.getUid();
-        //Log.d(TAG ,userID);
-        final User userDetails = new User(name, email, contact);
-        mDatabaseRefrence.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.child(userDetails.getName()).exists()) {
-                    Toast.makeText(RegisterActivity.this, "User already exists", Toast.LENGTH_SHORT).show();
-                }
-                else{
+        if(mAuth.getCurrentUser() != null) {
+            FirebaseUser user = mAuth.getCurrentUser();
+            final String userID = user.getUid();
+
+            //calling class constructor to put details
+            final User userDetails = new User(name, email, contact);
+
+            //adding data to firebase database
+            mDatabaseRefrence.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    //adding data to current userid child
                     mDatabaseRefrence.child(userID).setValue(userDetails);
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(RegisterActivity.this, "Something went wrong.", Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    //Toast.makeText(RegisterActivity.this, "Something went wrong.", Toast.LENGTH_SHORT).show();
+                    Log.d( "onCancelledDatabase: ", "can't add to database");
+                }
+            });
+        }
 
     }
 
@@ -188,9 +196,10 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                     else{
 
-                        Toast.makeText(RegisterActivity.this, "Check internet connection.", Toast.LENGTH_SHORT).show();
-                    }
-                    //updateUI(null);
+//new way to toast
+                        Snackbar snackbar = Snackbar.make(registerLinearLayout, "No internet connection",Snackbar.LENGTH_SHORT);
+                        snackbar.show();                    }
+
                 }
 
                 // progressDialog.cancel();

@@ -6,16 +6,20 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,19 +29,21 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.ProviderQueryResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class StartActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
-    TextView  skipExplore;
-
-    static int flag = 0;
+    TextView  skipExplore, forgotPassword;
 
     AutoCompleteTextView loginEmail;
     EditText loginPassword;
@@ -49,10 +55,25 @@ public class StartActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     DatabaseReference databaseReference;
 
+    LinearLayout linearLayout;
+
+    List<String> list;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mAuth = FirebaseAuth.getInstance();//fireauth reference
+        if(mAuth.getCurrentUser() != null) {
+            startActivity(new Intent(this, MainActivity.class));
+            finishAffinity();
+        }
         setContentView(R.layout.activity_start);
+
+        linearLayout = (LinearLayout)findViewById(R.id.loginLinearLayout);
+
+        list = new ArrayList<>();
+        //list.add("vasu@gmail.com");
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         //RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -64,9 +85,14 @@ public class StartActivity extends AppCompatActivity {
         loginPassword = (EditText) findViewById(R.id.loginPassword);
         login_registerButton = (Button) findViewById(R.id.login_registerButton);
 
-        mAuth = FirebaseAuth.getInstance();//fireauth reference
 
         databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+
+
+        //setting adapter for autocomplete email
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(StartActivity.this, R.layout.support_simple_spinner_dropdown_item, list);
+        loginEmail.setAdapter(arrayAdapter);
+        loginEmail.setThreshold(1);
 
         login_registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,6 +100,7 @@ public class StartActivity extends AppCompatActivity {
 
                 email = loginEmail.getText().toString();
                 password = loginPassword.getText().toString();
+
 
                 //validating email and password
                 if(android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
@@ -111,6 +138,39 @@ public class StartActivity extends AppCompatActivity {
             }
         });
 
+        forgotPassword = (TextView)findViewById(R.id.forgot_password);
+
+        //forgot password handler
+        forgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                email = loginEmail.getText().toString();
+                password = loginPassword.getText().toString();
+
+                if( !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ) {
+                    //enter email first
+                    if(password.length() > 0 || password.length() == 0)
+                        loginEmail.setError("Please provide correct email first");
+                }
+                else {
+                    //method to send email verification first
+                    FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+
+                                    if(task.isSuccessful()) {
+                                        Snackbar snackbar = Snackbar.make(linearLayout, "Open your email to reset password", Snackbar.LENGTH_LONG);
+                                        snackbar.show();
+                                    }
+                                }
+                            });
+                }
+
+            }
+        });
+
 
     }
 
@@ -134,7 +194,11 @@ public class StartActivity extends AppCompatActivity {
                     finish();
                 }
                 else{
-                    Toast.makeText(StartActivity.this, "need to regis", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(StartActivity.this, "need to regis", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(StartActivity.this,RegisterActivity.class);
+                    intent.putExtra("email",email);
+                    intent.putExtra("password",password);
+                    startActivity(intent);
                 }
             }
 
@@ -153,9 +217,13 @@ public class StartActivity extends AppCompatActivity {
 
         //signing with email and password
         (mAuth.signInWithEmailAndPassword(email, password)).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                progressDialog.dismiss();
+
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
 
                 //is success move to main activity
                 if(task.isSuccessful()) {
@@ -167,15 +235,36 @@ public class StartActivity extends AppCompatActivity {
                 else {
                     //moving to register activity
                     if(isNetworkAvailable()) {
-                        //Toast.makeText(StartActivity.this, "Not a member", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(StartActivity.this,RegisterActivity.class);
-                        intent.putExtra("email",email);
-                        intent.putExtra("password",password);
-                        startActivity(intent);
+
+                        // checking password is incorrect by checking email is present or not
+                        mAuth.fetchProvidersForEmail(email).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<ProviderQueryResult> task) {
+                                if(task.getResult().getProviders().isEmpty()) {
+
+                                    Intent intent = new Intent(StartActivity.this,RegisterActivity.class);
+                                    intent.putExtra("email",email);
+                                    intent.putExtra("password",password);
+                                    startActivity(intent);
+                                }
+                                else{
+                                    Snackbar snackbar = Snackbar.make(linearLayout, "Password is incorrect", Snackbar.LENGTH_SHORT);
+                                    snackbar.show();
+                                }
+                            }
+                        });
+
+
+                        //progressDialog.dismiss();
+
                     }
                     //network issues
+
                     else {
-                        Toast.makeText(StartActivity.this, "Check internet connection", Toast.LENGTH_SHORT).show();
+
+                        //new way to toast
+                        Snackbar snackbar = Snackbar.make(linearLayout, "No internet connection",Snackbar.LENGTH_SHORT);
+                        snackbar.show();
                     }
                 }
             }

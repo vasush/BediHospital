@@ -1,7 +1,9 @@
 package com.bedihospital.bedihospital;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
@@ -12,12 +14,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-
-
+    Menu nav_menu;
+    DrawerLayout drawerLayout;
+    TextView userName, userEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +35,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
+        userName = (TextView)findViewById(R.id.userName);
+        userEmail= (TextView)findViewById(R.id.userEmail);
 
         //navigation drawer fetch
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -36,8 +45,31 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        nav_menu = navigationView.getMenu();
+
+
+
+        // logot-login navigation butoon visibility
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+            //if user is logged in
+            nav_menu.findItem(R.id.nav_logoutAccount).setVisible(true);//logout visible
+            nav_menu.findItem(R.id.nav_loginAccount).setVisible(false);//login invisible
+
+        }
+        else{
+            // if user is logged out
+            nav_menu.findItem(R.id.nav_logoutAccount).setVisible(false);//logout invisible
+            nav_menu.findItem(R.id.nav_loginAccount).setVisible(true);//login visible (in case of skip and explore
+
+            userName.setVisibility(View.INVISIBLE);// visibility of name gone
+            userEmail.setVisibility(View.INVISIBLE);
+        }
     }
 //physical back button control
     @Override
@@ -50,13 +82,17 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
         }
-//        else {
-//            super.onBackPressed();
-//        }
+
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            finishAffinity();
+        }
+        else{
+            finish();
+        }
     }
 
 //loading the fragments when items are clicked
@@ -99,6 +135,7 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -111,6 +148,37 @@ public class MainActivity extends AppCompatActivity
             intent.putExtra(Intent.EXTRA_TEXT,link);
             startActivity(Intent.createChooser(intent,"Share via"));
         }
+        //logout item click handler, mean it logout and remain on main activity
+        else if(id == R.id.nav_logoutAccount) {
+            //show progress dialog
+            final ProgressDialog progressDialog = ProgressDialog.show(this,"Logout","Please wait",true);
+            //delaying the process
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //Do something after 100ms
+                    FirebaseAuth.getInstance().signOut();
+                    progressDialog.dismiss();
+                }
+            }, 1000);
+
+            FirebaseAuth.getInstance().signOut();//signing out
+
+            nav_menu.findItem(R.id.nav_logoutAccount).setVisible(false);// setting logout visibility
+            nav_menu.findItem(R.id.nav_loginAccount).setVisible(true);// setting login visibility
+
+            //closing navigation drawer
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            }
+
+        }
+        //login item click handler. goes to start activity
+        else if(id == R.id.nav_loginAccount) {
+            startActivity(new Intent(MainActivity.this, StartActivity.class));
+        }
+
         //calling method to change the layout on click of an item in navigation drawer
         displaySelectedScreen(id);
 
