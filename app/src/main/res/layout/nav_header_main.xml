@@ -9,25 +9,27 @@
     android:padding="12dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/userLogo"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:background="@drawable/custom_border"
-        android:src="@drawable/bedi_logo" />
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_account" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/userName"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:textSize="16sp"
+
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/userEmail"
+
         android:layout_marginTop="5dp"
         />
 

@@ -1,4 +1,4 @@
-package com.bedihospital.bedihospital;
+package com.bedihospital.bedihospital.Fragment;
 
 import android.Manifest;
 import android.content.Intent;
@@ -17,6 +17,8 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
+import com.bedihospital.bedihospital.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,7 @@ import java.util.List;
  * Created by Vasu on 27-Oct-17.
  */
 
-public class EmergencyCall extends Fragment {
+public class EmergencyCallFragment extends Fragment {
     LinearLayout ambulance, helpLine, bloodBank;
     String number = "09111891118";
     String number2 = "01722668111";

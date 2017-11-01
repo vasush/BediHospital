@@ -1,4 +1,4 @@
-package com.bedihospital.bedihospital;
+package com.bedihospital.bedihospital.Activity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -20,24 +20,19 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bedihospital.bedihospital.Model.User;
+import com.bedihospital.bedihospital.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class RegisterActivity extends AppCompatActivity {
-
-    private static final String TAG = "AddToDatabase";
 
     //views
     AutoCompleteTextView mEmailField;
@@ -73,12 +68,12 @@ public class RegisterActivity extends AppCompatActivity {
         mNamefield = (EditText) findViewById(R.id.registerName);
         mContactField = (EditText) findViewById(R.id.registerContact);
         registerButton = (Button) findViewById(R.id.registerButton);
-        registerLinearLayout = (LinearLayout)findViewById(R.id.registerLineraLayout);
+        registerLinearLayout = (LinearLayout) findViewById(R.id.registerLineraLayout);
 
 
         mAuth = FirebaseAuth.getInstance();
         // [START initialize_database_ref]
-        mDatabaseRefrence = FirebaseDatabase.getInstance().getReference("Users"); // Users is the table where details are stored
+        mDatabaseRefrence = FirebaseDatabase.getInstance().getReference(); //database refrence
 
         //getting email and password from login activity
         Bundle bundle = getIntent().getExtras();
@@ -95,8 +90,6 @@ public class RegisterActivity extends AppCompatActivity {
                 registerPassword = mPasswordField.getText().toString();
                 name = mNamefield.getText().toString();
                 contact = mContactField.getText().toString();
-
-                //Toast.makeText(RegisterActivity.this, email, Toast.LENGTH_SHORT).show();
 
                 //validating details
                 if (registerPassword.matches(loginPassword)) {
@@ -117,12 +110,10 @@ public class RegisterActivity extends AppCompatActivity {
 
                 if (passwordValid && nameValid && contactValid) {
 
-                    startSignIn();//firebase auth
-                    addToDatabase();//data store in firebase
-
+                    startSignIn();//starting firebase auth
 
                 } else {
-                    //Toast.makeText(RegisterActivity.this, "Something went wrong.", Toast.LENGTH_SHORT).show();
+
                 }
             }
 
@@ -132,30 +123,15 @@ public class RegisterActivity extends AppCompatActivity {
 
     // adding details to firebase database
     private void addToDatabase() {
-        if(mAuth.getCurrentUser() != null) {
-            FirebaseUser user = mAuth.getCurrentUser();
-            final String userID = user.getUid();
 
-            //calling class constructor to put details
-            final User userDetails = new User(name, email, contact);
+        Log.d("addToDatabase: ", "in add to data base...");
+        if (mAuth.getCurrentUser() != null) {
 
-            //adding data to firebase database
-            mDatabaseRefrence.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+            User userObject = new User(name, email, contact);//creating object of User class to send multiple data
+            final String userId = mAuth.getCurrentUser().getUid();//getting current user's id
+            mDatabaseRefrence.child("users").child(userId).setValue(userObject);//writing to firebase database
 
-                    //adding data to current userid child
-                    mDatabaseRefrence.child(userID).setValue(userDetails);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    //Toast.makeText(RegisterActivity.this, "Something went wrong.", Toast.LENGTH_SHORT).show();
-                    Log.d( "onCancelledDatabase: ", "can't add to database");
-                }
-            });
         }
-
     }
 
     //internet connection check
@@ -169,52 +145,46 @@ public class RegisterActivity extends AppCompatActivity {
     //adding user to firebase auth
     private void startSignIn() {
 
-        final ProgressDialog progressDialog1 = ProgressDialog.show(this,"Registering","Please wait",true);
+        //progress dialog
+        final ProgressDialog progressDialog1 = ProgressDialog.show(this, "Registering", "Please wait", true);
 
+        //method to create user
         mAuth.createUserWithEmailAndPassword(email, registerPassword).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
 
-                progressDialog1.dismiss();
+                //dismising progress dialog
+                if (progressDialog1 != null && progressDialog1.isShowing()) {
+                    progressDialog1.dismiss();
+                }
                 if (task.isSuccessful()) {
 
                     // Sign in success, update UI with the signed-in user's information
                     Log.d("TAG", "createUserWithEmail:success");
-                    FirebaseUser user = mAuth.getCurrentUser();
+
+                    addToDatabase();//data store in firebase
 
 //                  starting main activity
                     startActivity(new Intent(RegisterActivity.this, MainActivity.class));
                     finishAffinity();
-                    //updateUI(user);
+
                 } else {
-                    // If sign in fails, display a message to the user.
-                    if(isNetworkAvailable()) {
+                    // If sign up fails, display a message to the user.
+                    if (isNetworkAvailable()) {
 
                         Log.w("TAG", "createUserWithEmail:failure", task.getException());
-                        Toast.makeText(RegisterActivity.this, "User already exists",
+                        Toast.makeText(RegisterActivity.this, "Something went wrong",
                                 Toast.LENGTH_SHORT).show();
-                    }
-                    else{
+                    } else {
 
-//new way to toast
-                        Snackbar snackbar = Snackbar.make(registerLinearLayout, "No internet connection",Snackbar.LENGTH_SHORT);
-                        snackbar.show();                    }
+                        //new way to toast
+                        Snackbar snackbar = Snackbar.make(registerLinearLayout, "No internet connection", Snackbar.LENGTH_SHORT);
+                        snackbar.show();
+                    }
 
                 }
-
-                // progressDialog.cancel();
-
             }
         });
-    }
-
-    // [START on_start_check_user]
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-
     }
 
     // back arrow on action bar working

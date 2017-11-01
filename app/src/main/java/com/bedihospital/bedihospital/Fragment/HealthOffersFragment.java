@@ -1,45 +1,32 @@
-package com.bedihospital.bedihospital;
+package com.bedihospital.bedihospital.Fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 
-import com.firebase.client.Firebase;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.bedihospital.bedihospital.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by Vasu on 27-Oct-17.
  */
 
-public class BookAppointment extends Fragment {
+public class HealthOffersFragment extends Fragment {
     ArrayAdapter<String> cityArrayAdapter, specialityArrayAdapter;
     Spinner citySelectorSpinner, specialitySelectorSpinner;
-
-    Button appointmentSearch;
-
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.book_appointment, container, false);
+        View rootView = inflater.inflate(R.layout.health_offers, container, false);
 
         citySelectorSpinner = (Spinner) rootView.findViewById(R.id.citySelector);
         specialitySelectorSpinner = (Spinner) rootView.findViewById(R.id.specialitySelector);
@@ -68,17 +55,6 @@ public class BookAppointment extends Fragment {
         specialityArrayAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, speacilityList);
         specialityArrayAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         specialitySelectorSpinner.setAdapter(specialityArrayAdapter);
-
-        appointmentSearch = (Button)rootView.findViewById(R.id.appointmentSearch);
-
-
-
-        appointmentSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(getActivity(),SearchResult.class));
-            }
-        });
 
         return rootView;
 

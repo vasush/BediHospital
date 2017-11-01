@@ -1,4 +1,4 @@
-package com.bedihospital.bedihospital;
+package com.bedihospital.bedihospital.Activity;
 
 import android.app.Application;
 

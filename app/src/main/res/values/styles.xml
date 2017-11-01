@@ -9,7 +9,7 @@
     </style>
 
 
-<!--splash screen-->
+    <!--splash screen-->
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -18,13 +18,16 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="MainActivity.NoActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="MainActivityStyle" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
     </style>
-<!--title of action bar -->
-    <style name="StartActivityTitle" parent="@android:style/TextAppearance.Medium" >
+    <!--title of action bar -->
+    <style name="StartActivityTitle" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">20sp</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">@android:color/white</item>
@@ -36,9 +39,6 @@
         <item name="colorPrimaryDark">#00600f</item>
         <item name="colorAccent">#000</item>
     </style>
-
-
-
 
 
     <!--changing color of progress bar-->

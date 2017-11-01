@@ -37,14 +37,18 @@ public class User {
         this.contact = contact;
     }
 
-
-
     public User(String name, String email, String contact) {
 
         this.name = name;
         this.email = email;
         this.contact = contact;
 
+    }
+
+    public  User(String name, String email) {
+
+        this.name = name;
+        this.email = email;
     }
 
 }

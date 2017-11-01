@@ -1,4 +1,4 @@
-package com.bedihospital.bedihospital;
+package com.bedihospital.bedihospital.Fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.bedihospital.bedihospital.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +18,7 @@ import java.util.List;
  * Created by Vasu on 27-Oct-17.
  */
 
-public class HealthOffers extends Fragment {
+public class FindDoctorFragment extends Fragment {
     ArrayAdapter<String> cityArrayAdapter, specialityArrayAdapter;
     Spinner citySelectorSpinner, specialitySelectorSpinner;
 
@@ -24,7 +26,8 @@ public class HealthOffers extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.health_offers, container, false);
+        // layout for finding a doctor
+        View rootView = inflater.inflate(R.layout.find_doctor, container, false);
 
         citySelectorSpinner = (Spinner) rootView.findViewById(R.id.citySelector);
         specialitySelectorSpinner = (Spinner) rootView.findViewById(R.id.specialitySelector);
@@ -62,9 +65,5 @@ public class HealthOffers extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
     }
-
-
-
 }
