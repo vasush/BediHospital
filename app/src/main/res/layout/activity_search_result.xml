@@ -1,15 +1,26 @@
 <LinearLayout android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android" >
+    android:background="@color/grey"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:id="@+id/appointmentSearchResult"
-        android:gravity="center"
+        android:id="@+id/searchresultQuantity"
+        android:textColor="@android:color/black"
         android:textSize="20sp"
-        android:layout_marginTop="200dp"
-        android:textColor="@android:color/black"/>
+        android:gravity="center"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/black"
+       />
+
+<android.support.v7.widget.RecyclerView android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/searchResultRecyclerView"
+    android:scrollbars="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android" />
 
 </LinearLayout>

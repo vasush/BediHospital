@@ -3,11 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:id="@+id/appointment_linear_layout"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
     android:background="@color/grey"
-    tools:context="com.bedihospital.bedihospital.CommonSearchActivity">
+    >
+
 
     <ImageView
         android:layout_width="100dp"
@@ -36,7 +38,8 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:background="@drawable/custom_border"
-        android:id="@+id/citySelector"/>
+        android:id="@+id/citySelector"
+        android:spinnerMode="dropdown"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -49,7 +52,8 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:background="@drawable/custom_border"
-        android:id="@+id/specialitySelector"/>
+        android:id="@+id/specialitySelector"
+        android:spinnerMode="dropdown"/>
 
     <Button
         android:layout_width="match_parent"

@@ -9,5 +9,162 @@
     tools:context="com.bedihospital.bedihospital.Activity.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:alpha=".7"
+        android:id="@+id/home_fragment_image"
+
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="330dp"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/home_layout_border"
+            android:weightSum="2"
+            android:orientation="vertical">
+            <!--vertical view that takes full width-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:weightSum="2"
+                android:orientation="horizontal">
+                <!--for image and text inside 1 pannel-->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:id="@+id/home_fragment_appointment"
+                    android:orientation="vertical"
+                    android:weightSum="2">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="0dp"
+                        android:layout_marginLeft="65dp"
+                        android:src="@drawable/ic_book_appointment"
+                        android:layout_weight="1"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="Book Appointment"
+                        android:textSize="17sp"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"/>
+
+                </LinearLayout>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimary"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:id="@+id/home_fragment_doctor"
+                    android:weightSum="2"
+                    android:orientation="vertical">
+
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="0dp"
+                        android:layout_marginLeft="65dp"
+                        android:src="@drawable/ic_local_hospital"
+                        android:layout_weight="1"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="Find A Doctor"
+                        android:textSize="17sp"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+            </LinearLayout>
+            <!--vertical line-->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/colorPrimary"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <!--for image and text inside 1 pannel-->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:id="@+id/home_fragment_health"
+                    android:orientation="vertical"
+                    android:weightSum="2">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="0dp"
+                        android:layout_marginLeft="65dp"
+                        android:src="@drawable/ic_health_offers"
+                        android:layout_weight="1"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="Health Offers"
+                        android:textSize="17sp"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"/>
+
+                </LinearLayout>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimary"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:id="@+id/home_fragment_emergency"
+                    android:weightSum="2"
+                    android:orientation="vertical">
+
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_marginLeft="65dp"
+                        android:layout_height="0dp"
+                        android:src="@drawable/ic_call"
+                        android:layout_weight="1"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="Emergency Call"
+                        android:textSize="17sp"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"/>
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+
 
 </FrameLayout>

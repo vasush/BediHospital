@@ -1,16 +1,23 @@
 package com.bedihospital.bedihospital.Fragment;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.bedihospital.bedihospital.R;
 import com.bedihospital.bedihospital.SearchResult;
@@ -35,6 +42,10 @@ public class BookAppointmentFragment extends Fragment {
     Spinner citySelectorSpinner, specialitySelectorSpinner;
 
     Button appointmentSearch;
+
+    LinearLayout appointment_linaer_layout;
+
+    String cityName, specialityName;
 
 
     @Nullable
@@ -64,23 +75,65 @@ public class BookAppointmentFragment extends Fragment {
         // array adapter for city
         cityArrayAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, cityList);
         cityArrayAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        cityArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         citySelectorSpinner.setAdapter(cityArrayAdapter);
 
         //array adapter for speciality
         specialityArrayAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.support_simple_spinner_dropdown_item, speacilityList);
         specialityArrayAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        cityArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         specialitySelectorSpinner.setAdapter(specialityArrayAdapter);
 
+        //fetching city spinner
+        citySelectorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+                cityName = adapterView.getItemAtPosition(pos).toString();//city name
+                //Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        specialitySelectorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+                //speciality
+                specialityName = adapterView.getItemAtPosition(pos).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
         appointmentSearch = (Button)rootView.findViewById(R.id.appointmentSearch);
-
-
+        appointment_linaer_layout = (LinearLayout)rootView.findViewById(R.id.appointment_linear_layout);
 
         appointmentSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(),SearchResult.class));
+                //if interbet connection is on
+                if(isNetworkAvailable()) {
+
+                    //starting search activity and sending city and speciality
+                    Intent intent = new Intent(getActivity(), SearchResult.class);
+                    intent.putExtra("city", cityName);
+                    intent.putExtra("speciality", specialityName);
+                    startActivity(intent);
+                }
+                else {
+                    //new way to toast
+                    Snackbar snackbar = Snackbar.make(appointment_linaer_layout, "No internet connection", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                }
             }
         });
+
 
         return rootView;
 
@@ -91,6 +144,14 @@ public class BookAppointmentFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
+    }
+
+    //internet connection check
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 

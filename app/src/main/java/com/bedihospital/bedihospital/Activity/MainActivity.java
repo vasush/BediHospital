@@ -22,7 +22,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bedihospital.bedihospital.Fragment.BookAppointmentFragment;
 import com.bedihospital.bedihospital.Fragment.EmergencyCallFragment;
@@ -34,8 +37,11 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -46,15 +52,20 @@ public class MainActivity extends AppCompatActivity {
     TextView userName, userEmail;
     CircleImageView userLogo;
 
+    LinearLayout home_fragment_appointment, home_fragment_doctor, home_fragment_health, home_fragment_emergency;
+    ImageView home_fragment_image;
+
     DatabaseReference mRef;
     FirebaseUser firebaseUser;
     NavigationView navigationView;
+
+
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
 
     // toolbar titles respected to selected nav menu item
-    private String[] activityTitles = {"Home", "Book an ppointment", "Find a doctor", "Health Offers", "Emergency Numbers"};
+    private String[] activityTitles = {"Home", "Book an Appointment", "Find a doctor", "Health Offers", "Emergency Numbers"};
 
     // tags used to attach the fragments
     private static final String TAG_HOME = "home";
@@ -69,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
     private Handler mHandler;
 
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +91,21 @@ public class MainActivity extends AppCompatActivity {
 
         // Show status bar
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        //fetching linear layout ids
+        home_fragment_appointment = (LinearLayout)findViewById(R.id.home_fragment_appointment);
+        home_fragment_doctor = (LinearLayout)findViewById(R.id.home_fragment_doctor);
+        home_fragment_health = (LinearLayout)findViewById(R.id.home_fragment_health);
+        home_fragment_emergency = (LinearLayout)findViewById(R.id.home_fragment_emergency);
+
+        home_fragment_image = (ImageView)findViewById(R.id.home_fragment_image); //id for image
+        String url = "https://firebasestorage.googleapis.com/v0/b/bedi-hospital.appspot.com/o/home_page_image.jpg?alt=media&token=279f6483-4f86-47a6-9272-58d9bf61f679";
+        Glide.with(this).load(url).thumbnail(0.5f).into(home_fragment_image);//using glide to bring home image
+
+        homeFragmentButtonClick(home_fragment_appointment, 1);//calling appointment fragment
+        homeFragmentButtonClick(home_fragment_doctor, 2); //calling doctor fragment
+        homeFragmentButtonClick(home_fragment_health, 3); //calling health fragment
+        homeFragmentButtonClick(home_fragment_emergency, 4); //calling emergency fragment
 
         //navigation drawer fetch
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -111,11 +136,48 @@ public class MainActivity extends AppCompatActivity {
         userLogo = (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.userLogo);
 
         mRef = FirebaseDatabase.getInstance().getReference();
+
+
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         // logout-login navigation butoon visibility
         loginLogoutFirebase();
 
+    }//on create ends
+
+    //handle click of button on home page
+    private void homeFragmentButtonClick(LinearLayout linearLayout, final int nav) {
+        linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Toast.makeText(MainActivity.this, "Injnjkb", Toast.LENGTH_SHORT).show();
+                switch (nav){
+                    case 1:   //loads appointment fragment
+                        navItemIndex = nav;
+                        CURRENT_TAG = TAG_APPOINTMENT;
+                        loadHomeFragment();
+                        break;
+
+                    case 2:   //loads doctor fragment
+                        navItemIndex = nav;
+                        CURRENT_TAG = TAG_DOCTOR;
+                        loadHomeFragment();
+                        break;
+
+                    case 3:   //loads health fragment
+                        navItemIndex = nav;
+                        CURRENT_TAG = TAG_HEALTH;
+                        loadHomeFragment();
+                        break;
+
+                    case 4:   //loads emergency fragment
+                        navItemIndex = nav;
+                        CURRENT_TAG = TAG_EMERGENCY;
+                        loadHomeFragment();
+                        break;
+                }
+            }
+        });
     }
 
     private void loginLogoutFirebase() {
@@ -126,12 +188,49 @@ public class MainActivity extends AppCompatActivity {
             String name = firebaseUser.getDisplayName();
 
             for (UserInfo user : FirebaseAuth.getInstance().getCurrentUser().getProviderData()) {
+
                 if (user.getProviderId().equals("google.com")) {
                     //loading image of the user if he sign in from google account
                     Uri imageUri = firebaseUser.getPhotoUrl();//getting image uri from firebase
                     Glide.with(this).load(imageUri.toString()).thumbnail(0.5f).into(userLogo);//using glide to bring image
 
                     userName.setText(name);
+                }
+                //user whose email id not google
+                else {
+
+                    DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("users");//linking user to app
+                    final String uId = firebaseUser.getUid();//current id
+
+//                    mref.addValueEventListener(new ValueEventListener() {
+//                        @Override
+//                        public void onDataChange(DataSnapshot dataSnapshot) {
+//                            UserInformation user = dataSnapshot.child(uId).getValue(UserInformation.class);
+//                            Log.d( "user name: ",user.getName());
+//                        }
+//
+//                        @Override
+//                        public void onCancelled(DatabaseError databaseError) {
+//
+//                        }
+//                    });
+
+
+                    DatabaseReference newRef = mref.child(uId);//in child current id
+                    newRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+
+                            String name = String.valueOf(dataSnapshot.child("name").getValue());//getting value of name
+                            userName.setText(name);//setting name
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
                 }
             }
 
@@ -142,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
             userEmail.setText(email);//setting email from database
 
             userName.setVisibility(View.VISIBLE);//name visibility on
-            showUserName(userName);//to show name from database
+            //showUserName(userName);//to show name from database
 
 
             //if user is logged in
@@ -182,7 +281,11 @@ public class MainActivity extends AppCompatActivity {
 
         //changing navigation drawer
         if (drawer.isDrawerOpen(GravityCompat.START)) {
+            Log.d("onBackPressed: ", "nav closed");
             drawer.closeDrawers();
+            return;
+        } else {
+            super.onBackPressed();
         }
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -191,8 +294,54 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
 
-        super.onBackPressed();
+
     }
+
+    //method called when main activity ersumes from login activity an it loads home fragment without any transition
+    private void loadHomeFragmentFromBackButton() {
+
+        // selecting appropriate nav menu item
+        selectNavMenu(0);
+
+        // set toolbar title
+        setToolbarTitle();
+
+        // if user select the current navigation menu again, don't do anything
+        // just close the navigation drawer
+        if (getSupportFragmentManager().findFragmentByTag(CURRENT_TAG) != null) {
+            drawer.closeDrawers();
+            return;
+        }
+
+        // Sometimes, when fragment has huge data, screen seems hanging
+        // when switching between navigation menus
+        // So using runnable, the fragment is loaded with cross fade effect
+        // This effect can be seen in GMail app
+        Runnable mPendingRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // update the main content by replacing fragments
+                Fragment fragment = getHomeFragment();
+                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                //fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                //android.R.anim.fade_out);
+                fragmentTransaction.replace(R.id.content_main, fragment, CURRENT_TAG);
+                fragmentTransaction.commitAllowingStateLoss();
+            }
+        };
+
+        // If mPendingRunnable is not null, then add to the message queue
+        if (mPendingRunnable != null) {
+            mHandler.post(mPendingRunnable);
+        }
+
+        //Closing drawer on item click
+        drawer.closeDrawers();
+
+        // refresh toolbar menu
+        invalidateOptionsMenu();
+    }
+
 
     /***
      * Returns respected fragment that user
@@ -200,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void loadHomeFragment() {
         // selecting appropriate nav menu item
-        selectNavMenu();
+        selectNavMenu(navItemIndex);
 
         // set toolbar title
         setToolbarTitle();
@@ -269,8 +418,8 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(activityTitles[navItemIndex]);
     }
 
-    private void selectNavMenu() {
-        navigationView.getMenu().getItem(navItemIndex).setChecked(true);
+    private void selectNavMenu(int navItem) {
+        navigationView.getMenu().getItem(navItem).setChecked(true);
     }
 
     private void setUpNavigationView() {
@@ -326,7 +475,7 @@ public class MainActivity extends AppCompatActivity {
                         logout();
                         break;
                     case R.id.nav_loginAccount:
-                        startActivity(new Intent(MainActivity.this, StartActivity.class));
+                        login();
                         break;
                     default:
                         navItemIndex = 0;
@@ -345,6 +494,25 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    private void login() {
+
+        //delaying the load of activity on login b'coz it takes few sec to code nav drawer
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //Do something after 500ms
+                Intent intent = new Intent(MainActivity.this, StartActivity.class);
+                intent.putExtra("loginItem", "coming from main");//this is to hide skip and explore in login of main
+                //startActivity(intent);
+                startActivityForResult(intent, 1);
+
+            }
+        }, 150);
+
+
     }
 
     private void logout() {
@@ -369,5 +537,27 @@ public class MainActivity extends AppCompatActivity {
         nav_menu.findItem(R.id.nav_loginAccount).setVisible(true);// setting login visibility
     }
 
+    //this method works when the activity resumes and we want to show home fragment on returning from activity on back button click
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+
+                if (shouldLoadHomeFragOnBackPress) {
+                    // checking if user is on other navigation menu
+                    // rather than home
+                    if (navItemIndex != 0) {
+                        navItemIndex = 0;
+                        CURRENT_TAG = TAG_HOME;
+                        selectNavMenu(0);
+                        loadHomeFragmentFromBackButton();//new method for replacing fragments but without transition
+                        return;
+                    }
+                }
+
+            }
+        }
+    }
 }
 

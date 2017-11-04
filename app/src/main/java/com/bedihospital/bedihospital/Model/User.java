@@ -6,8 +6,39 @@ package com.bedihospital.bedihospital.Model;
 
 // for adding details of user to firebase database
 public class User {
+    public String getCity() {
+        return city;
+    }
 
-    public String name, email, contact;
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getSpeciality() {
+        return speciality;
+    }
+
+    public void setSpeciality(String speciality) {
+        this.speciality = speciality;
+    }
+
+    public String getSpaciality_city() {
+        return spaciality_city;
+    }
+
+    public String getFare() {
+        return fare;
+    }
+
+    public void setFare(String fare) {
+        this.fare = fare;
+    }
+
+    public void setSpaciality_city(String spaciality_city) {
+        this.spaciality_city = spaciality_city;
+    }
+
+    public String name, email, contact, city, speciality, spaciality_city, fare;
 
     public User(){
 

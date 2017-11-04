@@ -37,8 +37,12 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.ProviderQueryResult;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.shobhitpuri.custombuttons.GoogleSignInButton;
 
 
@@ -149,6 +153,16 @@ public class StartActivity extends AppCompatActivity implements
 
         //skip & explore button handler
         skipExplore = (TextView) findViewById(R.id.skipExplore);
+
+        //hide skip and explore when login item is cicked in main activity
+        Bundle bundle = getIntent().getExtras();
+        if(bundle != null) {
+            String message = bundle.getString("loginItem");
+            if(message.matches("coming from main")) {
+                skipExplore.setVisibility(View.GONE);
+            }
+        }
+
         skipExplore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -339,6 +353,18 @@ public class StartActivity extends AppCompatActivity implements
                 }
             }
         });
+
+    }
+
+    @Override
+    public void onBackPressed() {
+
+// to send value to previous activty so the we came to know from which activity it is coming from.
+        Intent intent = new Intent();
+        intent.putExtra("backToMain", "back to main for home");
+        setResult(RESULT_OK, intent);
+        finish();
+        super.onBackPressed();
 
     }
 
