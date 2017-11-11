@@ -1,60 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/findDoctorCoordinatorLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/grey"
-    tools:context="com.bedihospital.bedihospital.CommonSearchActivity">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:src="@drawable/ic_local_hospital"
-        android:layout_marginLeft="120dp"/>
-
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:gravity="center"
-        android:text="Find the Doctor that you are looking for, or the speciality of your prefrence,"
-        android:textSize="20sp"
-        android:textColor="@android:color/black" />
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="com.bedihospital.bedihospital.SnackBarBehaviour">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="CITY"
-        android:layout_marginTop="20dp"
-        android:textSize="24sp"
-        />
-    <Spinner
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/custom_border"
-        android:id="@+id/citySelector"/>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SPECIALITY"
-        android:textSize="24sp"
-        android:layout_marginTop="20dp"
-        />
-    <Spinner
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/custom_border"
-        android:id="@+id/specialitySelector"/>
+            android:background="@color/grey"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:text="SEARCH"
-        android:layout_marginTop="40dp"
-        android:textSize="18sp"
-        android:background="@drawable/button_border"
-        android:textColor="@android:color/white"/>
-</LinearLayout>
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginLeft="120dp"
+                android:src="@drawable/ic_local_hospital" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:gravity="center"
+                android:text="Find the Doctor that you are looking for, or the speciality of your prefrence,"
+                android:textColor="@android:color/black"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="CITY"
+                android:textSize="20sp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/custom_border">
+
+                <Spinner
+                    android:id="@+id/findDoctorCitySelector"
+                    style="@style/Widget.AppCompat.DropDownItem.Spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:spinnerMode="dropdown" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="SPECIALITY"
+                android:textSize="20sp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/custom_border">
+
+                <Spinner
+                    android:id="@+id/findDoctorSpecialitySelector"
+                    style="@style/Widget.AppCompat.DropDownItem.Spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:spinnerMode="dropdown" />
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/findDoctorSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/button_border"
+                android:text="SEARCH"
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+    </ScrollView>
+</android.support.design.widget.CoordinatorLayout>

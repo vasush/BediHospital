@@ -34,11 +34,19 @@ public class User {
         this.fare = fare;
     }
 
+    public String getDetail() {
+        return detail;
+    }
+
+    public void setDetail(String detail) {
+        this.detail = detail;
+    }
+
     public void setSpaciality_city(String spaciality_city) {
         this.spaciality_city = spaciality_city;
     }
 
-    public String name, email, contact, city, speciality, spaciality_city, fare;
+    public String name, email, contact, city, speciality, spaciality_city, fare, detail;
 
     public User(){
 

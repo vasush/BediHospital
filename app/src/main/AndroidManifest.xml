@@ -35,12 +35,15 @@
         <activity
             android:name=".Activity.RegisterActivity"
             android:label="@string/title_activity_login" />
-        <activity android:name=".SearchResult"
-            android:label="Book an Appointment"/>
+        <activity
+            android:name=".SearchResult"
+             />
         <activity
             android:name=".Activity.StartActivity"
             android:theme="@style/MyTheme"
             android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".DoctorDetails"
+            android:label="Doctor Details"></activity>
     </application>
 
 </manifest>

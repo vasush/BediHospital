@@ -1,12 +1,18 @@
 package com.bedihospital.bedihospital.Activity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
@@ -20,13 +26,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bedihospital.bedihospital.DoctorDetails;
 import com.bedihospital.bedihospital.Fragment.BookAppointmentFragment;
 import com.bedihospital.bedihospital.Fragment.EmergencyCallFragment;
 import com.bedihospital.bedihospital.Fragment.FindDoctorFragment;
@@ -34,6 +44,10 @@ import com.bedihospital.bedihospital.Fragment.HealthOffersFragment;
 import com.bedihospital.bedihospital.Fragment.HomeFragment;
 import com.bedihospital.bedihospital.R;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
@@ -45,21 +59,22 @@ import com.google.firebase.database.ValueEventListener;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+
 public class MainActivity extends AppCompatActivity {
 
     Menu nav_menu;
     DrawerLayout drawer;
-    TextView userName, userEmail;
+    TextView userName, userEmail, homeFragmentText, homeFragmentInternetText;
     CircleImageView userLogo;
 
-    LinearLayout home_fragment_appointment, home_fragment_doctor, home_fragment_health, home_fragment_emergency;
+    LinearLayout home_fragment_appointment, home_fragment_doctor, home_fragment_health, home_fragment_emergency, homeFragmentLinearLayoutGrid;
     ImageView home_fragment_image;
 
     DatabaseReference mRef;
     FirebaseUser firebaseUser;
     NavigationView navigationView;
 
-
+    FrameLayout homeFragmentFrameLayout;
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
@@ -79,15 +94,16 @@ public class MainActivity extends AppCompatActivity {
     private boolean shouldLoadHomeFragOnBackPress = true;
     private Handler mHandler;
 
+    ProgressBar homeFragmentProgressBar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar =  findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         // Show status bar
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -98,9 +114,61 @@ public class MainActivity extends AppCompatActivity {
         home_fragment_health = (LinearLayout)findViewById(R.id.home_fragment_health);
         home_fragment_emergency = (LinearLayout)findViewById(R.id.home_fragment_emergency);
 
+        //progress bar
+        homeFragmentProgressBar = findViewById(R.id.homeFragmentProgressBar);
+
+        homeFragmentLinearLayoutGrid = findViewById(R.id.homeFragmentLinearLayoutGrid);
+        homeFragmentFrameLayout = findViewById(R.id.content_main);
+        homeFragmentText = findViewById(R.id.homeFragmentText);
+        homeFragmentInternetText = findViewById(R.id.homeFragmentInternetText);
+
         home_fragment_image = (ImageView)findViewById(R.id.home_fragment_image); //id for image
+
+
+        //url for home page image
         String url = "https://firebasestorage.googleapis.com/v0/b/bedi-hospital.appspot.com/o/home_page_image.jpg?alt=media&token=279f6483-4f86-47a6-9272-58d9bf61f679";
-        Glide.with(this).load(url).thumbnail(0.5f).into(home_fragment_image);//using glide to bring home image
+
+        //using glide to load the url into image view
+        Glide.with(this)
+                .load(url)
+                .listener(new RequestListener<Drawable>() {//loading progress bar till the image loads
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+
+                        //on faliure dissmiss progress bar and toast the error
+                        homeFragmentProgressBar.setVisibility(View.GONE);
+
+                        //check for network availability
+                        if(isNetworkAvailable()) {
+                            //new way to toast
+                            Snackbar.make(homeFragmentFrameLayout, "Something went wrong", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                        //if not then show internet error message
+                        else {
+                            homeFragmentInternetText.setVisibility(View.VISIBLE);
+                        }
+
+
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+
+                       //on success dissmiss the progress bar
+                        homeFragmentProgressBar.setVisibility(View.GONE);
+
+                        //hide internet error message
+                        homeFragmentInternetText.setVisibility(View.GONE);
+
+                        //make text view and grid visible
+                        homeFragmentLinearLayoutGrid.setVisibility(View.VISIBLE);
+                        homeFragmentText.setVisibility(View.VISIBLE);
+                        return false;
+                    }
+                })
+                .thumbnail(0.5f).into(home_fragment_image);//using glide to bring home image
 
         homeFragmentButtonClick(home_fragment_appointment, 1);//calling appointment fragment
         homeFragmentButtonClick(home_fragment_doctor, 2); //calling doctor fragment
@@ -138,12 +206,40 @@ public class MainActivity extends AppCompatActivity {
         mRef = FirebaseDatabase.getInstance().getReference();
 
 
+
+
+        Bundle bundle = getIntent().getExtras();
+        if(bundle !=  null) {
+            String mainActivityMessage = bundle.getString("mainActivityMessage");
+            if(mainActivityMessage != null && mainActivityMessage.equals("coming from start activity to go to doctor activity")) {
+
+                Intent intent = new Intent(MainActivity.this, DoctorDetails.class);
+                intent.putExtra("mainActivity", "coming from main activity");
+                startActivity(intent);
+                finish();
+            }
+        }
+
+    }//on create ends
+
+    //onStart is used to dynamically load the contents
+    @Override
+    protected void onStart() {
+        super.onStart();
+
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         // logout-login navigation butoon visibility
         loginLogoutFirebase();
+    }
 
-    }//on create ends
+    //internet connection check
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
     //handle click of button on home page
     private void homeFragmentButtonClick(LinearLayout linearLayout, final int nav) {
@@ -183,6 +279,8 @@ public class MainActivity extends AppCompatActivity {
     private void loginLogoutFirebase() {
 
         if (firebaseUser != null) {
+
+           // Toast.makeText(this, "inside login and logot method", Toast.LENGTH_SHORT).show();
 
             String email = firebaseUser.getEmail();
             String name = firebaseUser.getDisplayName();
@@ -258,9 +356,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showUserName(final TextView name) {
 
-    }
 
     //physical back button control
     @Override
@@ -510,7 +606,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, 1);
 
             }
-        }, 150);
+        }, 1000);
 
 
     }
@@ -542,7 +638,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
+
             if (resultCode == RESULT_OK) {
+
 
                 if (shouldLoadHomeFragOnBackPress) {
                     // checking if user is on other navigation menu
@@ -558,6 +656,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+
     }
 }
 

@@ -10,15 +10,18 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.bedihospital.bedihospital.Activity.MainActivity;
 import com.bedihospital.bedihospital.R;
 import com.bedihospital.bedihospital.SearchResult;
 import com.firebase.client.Firebase;
@@ -38,7 +41,9 @@ import static android.content.ContentValues.TAG;
  */
 
 public class BookAppointmentFragment extends Fragment {
+
     ArrayAdapter<String> cityArrayAdapter, specialityArrayAdapter;
+
     Spinner citySelectorSpinner, specialitySelectorSpinner;
 
     Button appointmentSearch;
@@ -48,14 +53,16 @@ public class BookAppointmentFragment extends Fragment {
     String cityName, specialityName;
 
 
+
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.book_appointment, container, false);
 
-        citySelectorSpinner = (Spinner) rootView.findViewById(R.id.citySelector);
-        specialitySelectorSpinner = (Spinner) rootView.findViewById(R.id.specialitySelector);
+        citySelectorSpinner = (Spinner) rootView.findViewById(R.id.appointmentCitySelector);
+        specialitySelectorSpinner = (Spinner) rootView.findViewById(R.id.appointmentSpecialitySelector);
 
         getActivity().setTitle("Book Appointment");
 
@@ -128,12 +135,11 @@ public class BookAppointmentFragment extends Fragment {
                 }
                 else {
                     //new way to toast
-                    Snackbar snackbar = Snackbar.make(appointment_linaer_layout, "No internet connection", Snackbar.LENGTH_SHORT);
-                    snackbar.show();
+                    Snackbar.make(view, "No internet connection", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                 }
             }
         });
-
 
         return rootView;
 

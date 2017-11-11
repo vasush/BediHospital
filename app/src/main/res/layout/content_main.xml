@@ -10,39 +10,58 @@
     tools:showIn="@layout/app_bar_main">
 
     <ImageView
+        android:id="@+id/home_fragment_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
         android:alpha=".7"
-        android:id="@+id/home_fragment_image"
+        android:scaleType="centerCrop" />
 
-        />
+    <TextView
+        android:id="@+id/homeFragmentText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="How can we help you today?"
+        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
+    <ProgressBar
+        android:id="@+id/homeFragmentProgressBar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:theme="@style/AppTheme.HomeFragmentProgressBar" />
+
     <LinearLayout
+        android:id="@+id/homeFragmentLinearLayoutGrid"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_marginTop="330dp"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/home_layout_border"
-            android:weightSum="2"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:weightSum="2">
             <!--vertical view that takes full width-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:weightSum="2"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:weightSum="2">
                 <!--for image and text inside 1 pannel-->
                 <LinearLayout
+                    android:id="@+id/home_fragment_appointment"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackground"
-                    android:id="@+id/home_fragment_appointment"
                     android:orientation="vertical"
                     android:weightSum="2">
 
@@ -50,47 +69,50 @@
                         android:layout_width="40dp"
                         android:layout_height="0dp"
                         android:layout_marginLeft="65dp"
-                        android:src="@drawable/ic_book_appointment"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_book_appointment" />
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
+                        android:gravity="center"
                         android:text="Book Appointment"
-                        android:textSize="17sp"
                         android:textColor="@android:color/black"
-                        android:gravity="center"/>
+                        android:textSize="17sp" />
 
                 </LinearLayout>
+
                 <View
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
-                    android:background="@color/colorPrimary"/>
+                    android:background="@color/colorPrimary" />
 
                 <LinearLayout
+                    android:id="@+id/home_fragment_doctor"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackground"
-                    android:id="@+id/home_fragment_doctor"
-                    android:weightSum="2"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:weightSum="2">
 
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="0dp"
                         android:layout_marginLeft="65dp"
-                        android:src="@drawable/ic_local_hospital"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_local_hospital" />
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
+                        android:gravity="center"
                         android:text="Find A Doctor"
-                        android:textSize="17sp"
                         android:textColor="@android:color/black"
-                        android:gravity="center"/>
+                        android:textSize="17sp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -98,7 +120,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/colorPrimary"/>
+                android:background="@color/colorPrimary" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -108,11 +130,11 @@
 
                 <!--for image and text inside 1 pannel-->
                 <LinearLayout
+                    android:id="@+id/home_fragment_health"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackground"
-                    android:id="@+id/home_fragment_health"
                     android:orientation="vertical"
                     android:weightSum="2">
 
@@ -120,51 +142,66 @@
                         android:layout_width="40dp"
                         android:layout_height="0dp"
                         android:layout_marginLeft="65dp"
-                        android:src="@drawable/ic_health_offers"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_health_offers" />
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
+                        android:gravity="center"
                         android:text="Health Offers"
-                        android:textSize="17sp"
                         android:textColor="@android:color/black"
-                        android:gravity="center"/>
+                        android:textSize="17sp" />
 
                 </LinearLayout>
+
                 <View
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
-                    android:background="@color/colorPrimary"/>
+                    android:background="@color/colorPrimary" />
+
                 <LinearLayout
+                    android:id="@+id/home_fragment_emergency"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackground"
-                    android:id="@+id/home_fragment_emergency"
-                    android:weightSum="2"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:weightSum="2">
 
 
                     <ImageView
                         android:layout_width="40dp"
-                        android:layout_marginLeft="65dp"
                         android:layout_height="0dp"
-                        android:src="@drawable/ic_call"
-                        android:layout_weight="1"/>
+                        android:layout_marginLeft="65dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_call" />
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
+                        android:gravity="center"
                         android:text="Emergency Call"
-                        android:textSize="17sp"
                         android:textColor="@android:color/black"
-                        android:gravity="center"/>
+                        android:textSize="17sp" />
                 </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>
     </LinearLayout>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="520dp"
+        android:background="@android:color/black"
+        android:gravity="center"
+        android:visibility="gone"
+        android:id="@+id/homeFragmentInternetText"
+        android:text="Check your internet connection"
+        android:textColor="@android:color/white"
+        android:textSize="15dp" />
 
 </FrameLayout>

@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:clickable="true"
     android:id="@+id/appointment_linear_layout"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
+    app:layout_behavior="com.bedihospital.bedihospital.SnackBarBehaviour"
     android:background="@color/grey"
     >
-
 
     <ImageView
         android:layout_width="100dp"
@@ -32,36 +38,48 @@
         android:layout_height="wrap_content"
         android:text="CITY"
         android:layout_marginTop="20dp"
-        android:textSize="24sp"
+        android:textSize="20sp"
         />
-    <Spinner
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="@drawable/custom_border"
-        android:id="@+id/citySelector"
+        android:background="@drawable/custom_border">
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/appointmentCitySelector"
+        style="@style/Widget.AppCompat.DropDownItem.Spinner"
         android:spinnerMode="dropdown"/>
+    </RelativeLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="SPECIALITY"
-        android:textSize="24sp"
+        android:textSize="20sp"
         android:layout_marginTop="20dp"
         />
-    <Spinner
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="@drawable/custom_border"
-        android:id="@+id/specialitySelector"
+        android:background="@drawable/custom_border">
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@style/Widget.AppCompat.DropDownItem.Spinner"
+        android:id="@+id/appointmentSpecialitySelector"
         android:spinnerMode="dropdown"/>
+    </RelativeLayout>
 
     <Button
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:text="SEARCH"
         android:id="@+id/appointmentSearch"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="50dp"
         android:textSize="18sp"
         android:background="@drawable/button_border"
         android:textColor="@android:color/white"/>
+
 </LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

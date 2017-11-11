@@ -6,12 +6,15 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -21,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bedihospital.bedihospital.DoctorDetails;
 import com.bedihospital.bedihospital.Model.User;
 import com.bedihospital.bedihospital.R;
 import com.bedihospital.bedihospital.RecyclerAdapter;
@@ -45,6 +49,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.shobhitpuri.custombuttons.GoogleSignInButton;
 
+import java.util.regex.Pattern;
+
 
 public class StartActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
@@ -58,11 +64,18 @@ public class StartActivity extends AppCompatActivity implements
     EditText loginPassword;
     Button login_registerButton;
 
-    String email, password;//getting text from fields
-    boolean emailValid, passwordValid;//validating details
+    String email, password, userContact;//getting text from fields
+    boolean emailValid, passwordValid ;//validating details
+    boolean contactReceived = false;
+
+
+    //use to store the key form doctor detail when this activity loads
+    String bookAppointmentMessage;
 
     FirebaseAuth mAuth;
     DatabaseReference databaseReference;
+
+    CoordinatorLayout coordinatorLayout;
 
     LinearLayout linearLayout;
 
@@ -84,6 +97,7 @@ public class StartActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_start);
 
         linearLayout = (LinearLayout) findViewById(R.id.loginLinearLayout);
+        coordinatorLayout = findViewById(R.id.startActivityCoordinatorLayout);
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -108,14 +122,18 @@ public class StartActivity extends AppCompatActivity implements
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-        googleSignIn = (GoogleSignInButton) findViewById(R.id.googleSignIn);
+        //google sign button
+        googleSignIn = findViewById(R.id.googleSignIn);
         googleSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Auth.GoogleSignInApi.signOut(mGoogleApiClient);
 
-                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                startActivityForResult(signInIntent, RC_SIGN_IN);
+                    contactDialogBox();
+
+//                    Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+//                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+//                    startActivityForResult(signInIntent, RC_SIGN_IN);
+
             }
         });
 
@@ -156,9 +174,19 @@ public class StartActivity extends AppCompatActivity implements
 
         //hide skip and explore when login item is cicked in main activity
         Bundle bundle = getIntent().getExtras();
-        if(bundle != null) {
+        if (bundle != null) {
+            //store key from main activity
             String message = bundle.getString("loginItem");
-            if(message.matches("coming from main")) {
+
+            //store key from doctor activity
+            bookAppointmentMessage = bundle.getString("bookingAppointmentLogin");
+
+            //if value matches mian activity value then hide skip and explore
+            if (message != null && message.matches("coming from main")) {
+                skipExplore.setVisibility(View.GONE);
+            }
+            //if value matches doctor activity value then hide skip and explore
+            if (bookAppointmentMessage != null && bookAppointmentMessage.equals("coming from doctor detail")) {
                 skipExplore.setVisibility(View.GONE);
             }
         }
@@ -167,7 +195,7 @@ public class StartActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(StartActivity.this, MainActivity.class));
-                finish();
+                //finish();
             }
         });
 
@@ -198,10 +226,80 @@ public class StartActivity extends AppCompatActivity implements
                                 }
                             });
                 }
+            }
+        });
+    }
+
+    //getting contat info of user when he sign in via google api
+    //dialog box for filling up the contact info
+    private void contactDialogBox() {
+
+        final AlertDialog.Builder mBuilder = new AlertDialog.Builder(StartActivity.this);
+        View mView = getLayoutInflater().inflate(R.layout.contact_dialog_box, null);
+
+        final EditText dialogContactInput;
+        final Button dialogContactButton;
+        final LinearLayout dialogContactLinearLayout;
+
+        dialogContactInput = mView.findViewById(R.id.dialogContactInput);
+        dialogContactButton = mView.findViewById(R.id.dialogContactButton);
+        dialogContactLinearLayout = mView.findViewById(R.id.dialogContactLinearLayout);
+
+        mBuilder.setView(mView);
+        final AlertDialog alertDialog = mBuilder.create();
+
+        dialogContactButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isNetworkAvailable()) {
+
+                    String contact = dialogContactInput.getText().toString();
+                    //String contactRegex = "^[789]\d{9}$";
+                    if (TextUtils.isEmpty(contact)) {
+                        dialogContactInput.setError("Contact can't be empty");
+                    } else if (Pattern.matches("^[789]\\d{9}$", contact) && contact.length()==10) {
+                        userContact = contact;
+                        alertDialog.dismiss();
+
+                        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+                        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+                        startActivityForResult(signInIntent, RC_SIGN_IN);
+
+                    } else {
+                        dialogContactInput.setError("Invalid contact");
+                        contactReceived = false;
+                    }
+
+
+//                    addDetailsToDataBase();//adding google account login details to firebase database
+//
+//                    //if value matches doctor activity value then hide skip and explore
+//                    if (bookAppointmentMessage != null && bookAppointmentMessage.equals("coming from doctor detail")) {
+//                        //skipExplore.setVisibility(View.GONE);
+//
+//                        //starting main activity on success
+//                        Intent intent = new Intent(StartActivity.this, DoctorDetails.class);
+//                        intent.putExtra("mainActivityMessage", "coming from start activity to go to doctor activity");
+//                        startActivity(intent);
+//                        finish();
+//                    } else {
+//                        //starting main activity on success
+//                        startActivity(new Intent(StartActivity.this, MainActivity.class));
+//                    }
+
+
+                } else {
+                    //new way to toast
+                    Snackbar snackbar = Snackbar.make(dialogContactLinearLayout, "No internet connection", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                }
 
             }
         });
 
+        if (!isFinishing()) {
+            alertDialog.show();
+        }
 
     }
 
@@ -227,8 +325,8 @@ public class StartActivity extends AppCompatActivity implements
 //                            Toast.LENGTH_SHORT).show();
                 } else {
                     //new way to toast
-                    Snackbar snackbar = Snackbar.make(linearLayout, "No internet connection", Snackbar.LENGTH_SHORT);
-                    snackbar.show();
+                    Snackbar.make(coordinatorLayout, "No internet connection", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                 }
             }
         }
@@ -236,6 +334,9 @@ public class StartActivity extends AppCompatActivity implements
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+        //progress dialog showing
+        final ProgressDialog progressDialog = ProgressDialog.show(this, "Login", "Please wait...", true);
+
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
@@ -243,22 +344,42 @@ public class StartActivity extends AppCompatActivity implements
 
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+
+                        //dismising progress dialog
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
-                            addDetailsToDataBase();
-                            //starting main activity on success
-                            startActivity(new Intent(StartActivity.this, MainActivity.class));
+
+                           // contactDialogBox();
+                            addDetailsToDataBase();//adding google account login details to firebase database
+
+                            //if value matches doctor activity value then hide skip and explore
+                            if (bookAppointmentMessage != null && bookAppointmentMessage.equals("coming from doctor detail")) {
+                                //skipExplore.setVisibility(View.GONE);
+
+                                //starting main activity on success
+                                Intent intent = new Intent(StartActivity.this, DoctorDetails.class);
+                                intent.putExtra("mainActivityMessage", "coming from start activity to go to doctor activity");
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                //starting main activity on success
+                                startActivity(new Intent(StartActivity.this, MainActivity.class));
+                            }
+
                         } else {
-                            if(isNetworkAvailable()) {
+                            if (isNetworkAvailable()) {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "signInWithCredential:failure", task.getException());
                                 Toast.makeText(StartActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
                             } else {
                                 //new way to toast
-                                Snackbar snackbar = Snackbar.make(linearLayout, "No internet connection", Snackbar.LENGTH_SHORT);
-                                snackbar.show();
+                                Snackbar.make(coordinatorLayout, "No internet connection", Snackbar.LENGTH_LONG)
+                                        .setAction("Action", null).show();
                             }
                         }
 
@@ -270,15 +391,15 @@ public class StartActivity extends AppCompatActivity implements
     //adding value to data base for google account
     private void addDetailsToDataBase() {
 
-        Log.d("addToDatabase: ", "in add to data base...");
+        Log.d("addToDatabase: ", "in add to data base..." + userContact);
 
-        if(mAuth.getCurrentUser() != null) {
+        if (mAuth.getCurrentUser() != null) {
 
             String gName = mAuth.getCurrentUser().getDisplayName();// name of google account
             String gEmail = mAuth.getCurrentUser().getEmail();// email of google account
             String gId = mAuth.getCurrentUser().getUid();// current user id
 
-            User user = new User(gName, gEmail);
+            User user = new User(gName, gEmail, userContact);
             databaseReference.child("users").child(gId).setValue(user);//setting value of name and email in uid under users
 
         }
@@ -315,8 +436,36 @@ public class StartActivity extends AppCompatActivity implements
                 if (task.isSuccessful()) {
 
                     // starting activity on success
-                    startActivity(new Intent(StartActivity.this, MainActivity.class));
-                    finish();
+//                    startActivity(new Intent(StartActivity.this, MainActivity.class));
+//                    finish();
+
+                    if (bookAppointmentMessage != null && bookAppointmentMessage.equals("coming from doctor detail")) {
+                        //skipExplore.setVisibility(View.GONE);
+
+                        //starting main activity on success
+                        Intent intent = new Intent(StartActivity.this, DoctorDetails.class);
+                        intent.putExtra("mainActivityMessage", "coming from start activity to go to doctor activity");
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        //starting main activity on success
+                        startActivity(new Intent(StartActivity.this, MainActivity.class));
+                    }
+
+                    //if value matches doctor activity value then hide skip and explore
+//                    if(bookAppointmentMessage != null && bookAppointmentMessage.equals("coming from doctor detail")) {
+//                        skipExplore.setVisibility(View.GONE);
+//
+//                        //starting main activity on success
+//                        Intent intent = new Intent(StartActivity.this, MainActivity.class);
+//                        intent.putExtra("mainActivityMessage", "coming from start activity to go to doctor activity");
+//                        startActivity(intent);
+//                        finish();
+//                    }
+//                    else {
+//                        //starting main activity on success
+//                        startActivity(new Intent(StartActivity.this, MainActivity.class));
+//                    }
 
                     Log.d("login: ", "Success");
 
@@ -337,8 +486,8 @@ public class StartActivity extends AppCompatActivity implements
                                 }
                                 //password is incorrect
                                 else {
-                                    Snackbar snackbar = Snackbar.make(linearLayout, "Password is incorrect", Snackbar.LENGTH_SHORT);
-                                    snackbar.show();
+                                    Snackbar.make(coordinatorLayout, "Password is incorrect", Snackbar.LENGTH_LONG)
+                                            .setAction("Action", null).show();
                                 }
                             }
                         });
@@ -347,8 +496,8 @@ public class StartActivity extends AppCompatActivity implements
                     //network issues
                     else {
                         //new way to toast
-                        Snackbar snackbar = Snackbar.make(linearLayout, "No internet connection", Snackbar.LENGTH_SHORT);
-                        snackbar.show();
+                        Snackbar.make(coordinatorLayout, "No internet connection", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
                     }
                 }
             }
