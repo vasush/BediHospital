@@ -4,18 +4,17 @@
 
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- To auto-complete the email text field in the login form with the user's emails -->
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.READ_PROFILE" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-
+    <!-- &lt;!&ndash; To auto-complete the email text field in the login form with the user's emails &ndash;&gt; -->
+    <!-- <uses-permission android:name="android.permission.GET_ACCOUNTS" /> -->
+    <!-- <uses-permission android:name="android.permission.READ_PROFILE" /> -->
+    <!-- <uses-permission android:name="android.permission.READ_CONTACTS" /> -->
     <application
         android:name=".Activity.BediHospital"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/bedi_logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="adjustPan|adjustResize">
@@ -35,15 +34,16 @@
         <activity
             android:name=".Activity.RegisterActivity"
             android:label="@string/title_activity_login" />
-        <activity
-            android:name=".SearchResult"
-             />
+        <activity android:name=".SearchResult" />
         <activity
             android:name=".Activity.StartActivity"
             android:theme="@style/MyTheme"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".DoctorDetails"
+        <activity
+            android:name=".DoctorDetails"
             android:label="Doctor Details"></activity>
+        <activity android:name=".EditProfile"
+            android:label="Edit Profile"></activity>
     </application>
 
 </manifest>

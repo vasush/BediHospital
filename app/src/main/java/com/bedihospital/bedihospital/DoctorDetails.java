@@ -11,6 +11,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -23,10 +25,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.GridView;
+import android.widget.ListAdapter;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -34,6 +38,7 @@ import android.widget.Toast;
 
 import com.bedihospital.bedihospital.Activity.MainActivity;
 import com.bedihospital.bedihospital.Activity.StartActivity;
+import com.bedihospital.bedihospital.Fragment.ProfileFragment;
 import com.bedihospital.bedihospital.Model.DoctorAppoitmentRecord;
 import com.bedihospital.bedihospital.Model.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -69,6 +74,7 @@ public class DoctorDetails extends AppCompatActivity
     TextView doctorDetailsName, doctorDetailsString, doctorDate;
     String doctorName, doctorDetail, selectedTime = "0";
     Button bookAppointment;
+    //    GridView timeGridView;
     GridView timeGridView;
 
     Session session = null;
@@ -87,7 +93,7 @@ public class DoctorDetails extends AppCompatActivity
     String[] timeHourMinuteAmPm = new String[4];
     String currentHour, currentMinute, currentAmPm;
 
-    String date = null, time = null, docName = null, docSpeciality = null, docCity = null;
+    String date = null, time = null, docName = null, docSpeciality = null, docCity = null, appotintedUser = null;
 
     String speciality, city;
 
@@ -107,7 +113,9 @@ public class DoctorDetails extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_doctor_details);
 
+        context = this;
         //to get the values send from search result activity
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -116,7 +124,6 @@ public class DoctorDetails extends AppCompatActivity
             speciality = bundle.getString("doctorSpeciality");//getting doc speciality
             city = bundle.getString("doctorCity");//getting doc city
 
-            setContentView(R.layout.activity_doctor_details);
 
             //userEmailId = bundle.getString("userEmailId");//getting user email id for sending mail as it is not working on async task
             //userName = bundle.getString("userName");//getting user name for sending mail as it is not working on async task
@@ -128,7 +135,6 @@ public class DoctorDetails extends AppCompatActivity
             }
         }
 
-        context = this;
 
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -139,7 +145,9 @@ public class DoctorDetails extends AppCompatActivity
         bookAppointment = findViewById(R.id.bookAppointment);
         doctorDate = findViewById(R.id.doctorDate);
         //doctorTime = findViewById(R.id.doctorTime);
-        timeGridView = findViewById(R.id.timeGridView);
+//        timeGridView = findViewById(R.id.timeGridView);
+
+
         //doctorDetailsScrollView = findViewById(R.id.doctorDetailsScrollView);
         coordinatorLayout = findViewById(R.id.coordinatorlayout);
 
@@ -162,7 +170,11 @@ public class DoctorDetails extends AppCompatActivity
             }
         });
 
-        timeGridView.setAdapter(new TimeAdapter(this));//setting grid view adapter (time adapter class)
+
+        timeGridView = findViewById(R.id.timeGridView);
+        TimeAdapter timeAdapter = new TimeAdapter(this);
+        timeGridView.setAdapter(timeAdapter);//setting grid view adapter (time adapter class)
+        //timeGridView.setExpanded(true);
         //grid view item on click
         timeGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -204,6 +216,7 @@ public class DoctorDetails extends AppCompatActivity
         bookAppointmentButtonClick();
 
     }//on create ends here
+
 
     @Override
     protected void onStart() {
@@ -256,143 +269,166 @@ public class DoctorDetails extends AppCompatActivity
 
                 //Toast.makeText(DoctorDetails.this, currentTime, Toast.LENGTH_SHORT).show();
                 // Log.d( "user email id: ", userEmailId);
-
-                if (mAuth.getCurrentUser() != null) {
-
-                    //Toast.makeText(context, userName + " " + userEmailId + " " + userContact, Toast.LENGTH_SHORT).show();
-
-                    //check if selecetd month, year is previous to current month,year
-                    if ((monthFinal < Integer.valueOf(currentMonth)) || (yearFinal < Integer.valueOf(currentYear))) {
-
-                        snackbar = Snackbar.make(coordinatorLayout, "Can't pick previous date", Snackbar.LENGTH_LONG);
-                        snackbar.show();
-                    }
-                    //check for previous date
-                    else if (dayFinal < Integer.valueOf(currentDay)) {
-
-                        snackbar = Snackbar.make(coordinatorLayout, "Can't book previous date", Snackbar.LENGTH_LONG);
-                        snackbar.show();
-                    }
-
-                    //check for sunday
-                    else if (currentDayOfWeek.equals(exception) || pickedDayOfWeek.equals(exception)) {
-
-                        snackbar = Snackbar.make(coordinatorLayout, "Doctor is not available on sunday", Snackbar.LENGTH_LONG);
-                        snackbar.show();
-                    }
-                    //check if selected time is null
-                    else if (selectedTime.equals("0")) {
-
-                        snackbar = Snackbar.make(coordinatorLayout, "Pick a suitable time", Snackbar.LENGTH_LONG);
-                        snackbar.show();
-                    } else {
-
-                        if (compareTime()) {
-
-                            //checking whether appointment is already there or not
-                            com.google.firebase.database.Query query = databaseReference.child("doctorAppointment")
-                                    .orderByChild("time").equalTo(selectedTime);
+                if (isNetworkAvailable()) {
 
 
-                            query.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    //if data does not exists
-                                    if (!dataSnapshot.exists()) {
-                                        //do something
-                                        //appointmentSearchResult.setText("No record found.");
-                                        Log.d("ds exists: ", ",ds does not exists");
-                                        confirmDialogBox();
+                    if (mAuth.getCurrentUser() != null) {
 
-                                    } else {
-                                        //iterate through whole object of database with spaeicif details
-                                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                                            if (ds.exists()) {
+                        //Toast.makeText(context, userName + " " + userEmailId + " " + userContact, Toast.LENGTH_SHORT).show();
 
+                        //check if selecetd month, year is previous to current month,year
+                        if ((monthFinal < Integer.valueOf(currentMonth)) || (yearFinal < Integer.valueOf(currentYear))) {
 
-                                                date = ds.getValue(DoctorAppoitmentRecord.class).getDate();//setting date
-                                                time = ds.getValue(DoctorAppoitmentRecord.class).getTime();//setting time
-                                                docName = ds.getValue(DoctorAppoitmentRecord.class).getDoctorName();//setting doc name
-                                                docSpeciality = ds.getValue(DoctorAppoitmentRecord.class).getSpeciality();//setting spec
-                                                docCity = ds.getValue(DoctorAppoitmentRecord.class).getCity();//setting city
-
-                                                if (date.equals(currentDate) && time.equals(selectedTime) && docName.equals(doctorName)
-                                                        && docSpeciality.equals(speciality) && docCity.equals(city)) {
-
-                                                    flag = 1;
-                                                    break;
-                                                }
-                                            }
-                                        }
-
-                                        Log.d("flag counter: ", Integer.toString(flag));
-                                        if (flag == 1) {
-                                            //already appoint
-                                            snackbar = Snackbar.make(coordinatorLayout, "Appointment is already booked for, " + docName + "." + " Pick some other time", Snackbar.LENGTH_LONG);
-                                            snackbar.show();
-
-                                            date = "";
-                                            time = "";
-                                            docName = "";
-                                            docSpeciality = "";
-                                            docCity = "";
-
-
-                                        } else {
-                                            //if appointment is not booked then open confirm appointment dialog.
-                                            confirmDialogBox();
-
-                                            date = "";
-                                            time = "";
-                                            docName = "";
-                                            docSpeciality = "";
-                                            docCity = "";
-
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
+                            snackbar = Snackbar.make(coordinatorLayout, "Can't pick previous date", Snackbar.LENGTH_LONG);
+                            snackbar.show();
                         }
-                        //is selected time is less than current time
-                        else {
-                            snackbar = Snackbar.make(coordinatorLayout, "Can't book this time now.", Snackbar.LENGTH_LONG);
+                        //check for previous date
+                        else if (dayFinal < Integer.valueOf(currentDay)) {
+
+                            snackbar = Snackbar.make(coordinatorLayout, "Can't book previous date", Snackbar.LENGTH_LONG);
                             snackbar.show();
                         }
 
-                    }
+                        //check for sunday
+                        else if (currentDayOfWeek.equals(exception)) {
 
-                }
+                            Log.d("exception if sunday: ", currentDayOfWeek + pickedDayOfWeek + exception);
+                            snackbar = Snackbar.make(coordinatorLayout, "Doctor is not available on sunday", Snackbar.LENGTH_LONG);
+                            snackbar.show();
+                        }
+                        //check if selected time is null
+                        else if (selectedTime.equals("0")) {
 
-                //if not login, open login activity.
-                else {
-                    snackbar = Snackbar.make(coordinatorLayout, "Need to login first", Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                            snackbar = Snackbar.make(coordinatorLayout, "Pick a suitable time", Snackbar.LENGTH_LONG);
+                            snackbar.show();
+                        } else {
 
-                    //delaying the process to load login page
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //Do something after 1.5s
-                            Intent intent = new Intent(DoctorDetails.this, StartActivity.class);
-                            intent.putExtra("bookingAppointmentLogin", "coming from doctor detail");
-                            startActivity(intent);
+                            if (compareTime()) {
+
+                                //checking whether appointment is already there or not
+                                com.google.firebase.database.Query query = databaseReference.child("doctorAppointment")
+                                        .orderByChild("time").equalTo(selectedTime);
+
+
+                                query.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        //if data does not exists
+                                        if (!dataSnapshot.exists()) {
+                                            //do something
+                                            //appointmentSearchResult.setText("No record found.");
+                                            Log.d("ds exists: ", ",ds does not exists");
+                                            confirmDialogBox();
+
+                                        } else {
+                                            //iterate through whole object of database with spaeicif details
+                                            for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                                                if (ds.exists()) {
+
+                                                    date = ds.getValue(DoctorAppoitmentRecord.class).getDate();//setting date
+                                                    time = ds.getValue(DoctorAppoitmentRecord.class).getTime();//setting time
+                                                    docName = ds.getValue(DoctorAppoitmentRecord.class).getDoctorName();//setting doc name
+                                                    docSpeciality = ds.getValue(DoctorAppoitmentRecord.class).getSpeciality();//setting spec
+                                                    docCity = ds.getValue(DoctorAppoitmentRecord.class).getCity();//setting city
+
+
+                                                    if (date.matches(currentDate) && time.matches(selectedTime) && docName.matches(doctorName)
+                                                            && docSpeciality.matches(speciality) && docCity.matches(city) && appotintedUser.matches(userName)) {
+
+                                                        Log.d("matching data: ", date + currentDate + ", " + time + selectedTime + ", "
+                                                                + docName + doctorName + ", " + docSpeciality + speciality + ", " + docCity + city);
+                                                        Log.d("button clicks: ", "changing flag to 1 ...");
+
+                                                        flag = 1;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            Log.d("flag counter: ", Integer.toString(flag));
+                                            if (flag == 1) {
+                                                //already appoint
+                                                snackbar = Snackbar.make(coordinatorLayout, "Appointment is already booked for, " + docName + "." + " Pick some other time", Snackbar.LENGTH_LONG);
+                                                snackbar.show();
+
+                                                date = "";
+                                                time = "";
+                                                docName = "";
+                                                docSpeciality = "";
+                                                docCity = "";
+                                                flag = 0;
+
+
+                                            } else {
+                                                //if appointment is not booked then open confirm appointment dialog.
+                                                confirmDialogBox();
+
+                                                date = "";
+                                                time = "";
+                                                docName = "";
+                                                docSpeciality = "";
+                                                docCity = "";
+
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+                            //is selected time is less than current time
+                            else {
+                                snackbar = Snackbar.make(coordinatorLayout, "Can't book this time now.", Snackbar.LENGTH_LONG);
+                                snackbar.show();
+                            }
 
                         }
-                    }, 1500);
 
+                    }
+
+                    //if not login, open login activity.
+                    else {
+                        snackbar = Snackbar.make(coordinatorLayout, "Need to login first", Snackbar.LENGTH_LONG);
+                        snackbar.show();
+
+                        //delaying the process to load login page
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                //Do something after 1.5s
+                                Intent intent = new Intent(DoctorDetails.this, StartActivity.class);
+                                intent.putExtra("bookingAppointmentLogin", "coming from doctor detail");
+                                startActivity(intent);
+
+                            }
+                        }, 1500);
+
+                    }
+
+                } else {
+                    snackbar = Snackbar.make(coordinatorLayout, "No internet connection", Snackbar.LENGTH_LONG);
+                    snackbar.show();
                 }
+
+
                 //if(dayFinal==Integer.valueOf(checkDate))
                 //Log.d("curr date: ", Integer.toString(dayFinal));
 
             }
         });
 
+    }
+
+    //To verify network availability:
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 
@@ -481,7 +517,7 @@ public class DoctorDetails extends AppCompatActivity
             protected PasswordAuthentication getPasswordAuthentication() {
 
                 //sending mail from the account mention below
-                return new PasswordAuthentication("vasush8402@gmail.com", "akinchan");
+                return new PasswordAuthentication("bedihospitalteam@gmail.com", "rajivsiwach");
             }
         });
 
@@ -505,19 +541,19 @@ public class DoctorDetails extends AppCompatActivity
                 Log.d("user email id: ", "in async task" + userEmailId);
 
                 //differnt mail id's
-                String[] multipleMailId = new String[]{userEmailId, "ramchanderk6@gmail.com"};
+                String[] multipleMailId = new String[]{userEmailId, "vasusharmak28@gmail.com"};
 
                 //different content according to different id's
                 String[] content = new String[]{"You booked an appointment with " + doctorName + " on "
                         + currentDate + " at " + selectedTime.substring(0, 8) + "." + "<br>" + "Please reach 5 minutes before time."
-                        + "<br>" + "<br>" + "Thank you.", userName + ", " + userContact + " has appointment with "
+                        + "<br>" + "<br>" + "Thank you.", userName + ", " + userContact + " booked appointment with "
                         + doctorName + ", " + speciality + " from " + city
                         + " on " + currentDate + " at " + selectedTime};
 
                 //creating message twice(depending on no of id's)
                 for (int m = 0; m < multipleMailId.length; m++) {
                     Message message = new MimeMessage(session);
-                    message.setFrom(new InternetAddress("vasush8402@gmail.com"));
+                    message.setFrom(new InternetAddress("bedihospitalteam@gmail.com"));
                     //sending mail to userEmail id
                     message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(multipleMailId[m]));
                     message.setSubject("Bedi Hospital");//subject
@@ -546,7 +582,7 @@ public class DoctorDetails extends AppCompatActivity
 
         //intent for loading main activity on click of a button
         Intent intent = new Intent(this, MainActivity.class);
-
+        intent.putExtra("notificationMessage", "open profile fragment");
         //getting default system ringtone for sound
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
@@ -682,7 +718,7 @@ public class DoctorDetails extends AppCompatActivity
         currentYear = new SimpleDateFormat("yyyy").format(new Date());//current year in string
 
         currentDayOfWeek = new SimpleDateFormat("EEEE").format(new Date());//current day name in string
-        pickedDayOfWeek = currentDayOfWeek;
+        //pickedDayOfWeek = currentDayOfWeek;
 
         //currentDayOfWeek = allDays[Integer.valueOf(currentDayOfWeek)];
 
@@ -736,12 +772,13 @@ public class DoctorDetails extends AppCompatActivity
         SimpleDateFormat simpledateformat = new SimpleDateFormat("EEEE");
         Date date = new Date(i, i1, i2 - 1);
         pickedDayOfWeek = simpledateformat.format(date);
+        currentDayOfWeek = pickedDayOfWeek;
 
 
         monthName = allMonths[monthFinal];//setting int values to string name of months
 
         //updating date when user selects date from dialog
-        currentDate = pickedDayOfWeek + ", " + dayFinal + "-" + monthName + "-" + yearFinal;
+        currentDate = currentDayOfWeek + ", " + dayFinal + "-" + monthName + "-" + yearFinal;
         doctorDate.setText(currentDate);//setting updated date on text view
         Log.d("dateTime: ", currentDate);
 

@@ -3,6 +3,7 @@ package com.bedihospital.bedihospital.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -23,12 +24,14 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -42,9 +45,11 @@ import com.bedihospital.bedihospital.Fragment.EmergencyCallFragment;
 import com.bedihospital.bedihospital.Fragment.FindDoctorFragment;
 import com.bedihospital.bedihospital.Fragment.HealthOffersFragment;
 import com.bedihospital.bedihospital.Fragment.HomeFragment;
+import com.bedihospital.bedihospital.Fragment.ProfileFragment;
 import com.bedihospital.bedihospital.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -56,6 +61,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.io.File;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -80,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     public static int navItemIndex = 0;
 
     // toolbar titles respected to selected nav menu item
-    private String[] activityTitles = {"Home", "Book an Appointment", "Find a doctor", "Health Offers", "Emergency Numbers"};
+    private String[] activityTitles = {"Home", "Book an Appointment", "Find a doctor", "Health Offers", "Emergency Numbers", "Profile"};
 
     // tags used to attach the fragments
     private static final String TAG_HOME = "home";
@@ -88,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG_DOCTOR = "doctors";
     private static final String TAG_HEALTH = "health";
     private static final String TAG_EMERGENCY = "emergency";
+    private static final String TAG_PROFILE = "profile";
     public static String CURRENT_TAG = TAG_HOME;
 
     // flag to load home fragment when user presses back key
@@ -96,23 +104,28 @@ public class MainActivity extends AppCompatActivity {
 
     ProgressBar homeFragmentProgressBar;
 
+    private boolean isCheckNetworkThreadActive = false; // Flag to indicate if thread is active
+    private boolean isNetworkAvaiableUIActive = false; // Flag to indicate which view is showing
+    final private static int NETWORK_CHECK_INTERVAL = 5000; // Sleep interval between checking network
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar =  findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // Show status bar
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+
         //fetching linear layout ids
-        home_fragment_appointment = (LinearLayout)findViewById(R.id.home_fragment_appointment);
-        home_fragment_doctor = (LinearLayout)findViewById(R.id.home_fragment_doctor);
-        home_fragment_health = (LinearLayout)findViewById(R.id.home_fragment_health);
-        home_fragment_emergency = (LinearLayout)findViewById(R.id.home_fragment_emergency);
+        home_fragment_appointment = (LinearLayout) findViewById(R.id.home_fragment_appointment);
+        home_fragment_doctor = (LinearLayout) findViewById(R.id.home_fragment_doctor);
+        home_fragment_health = (LinearLayout) findViewById(R.id.home_fragment_health);
+        home_fragment_emergency = (LinearLayout) findViewById(R.id.home_fragment_emergency);
 
         //progress bar
         homeFragmentProgressBar = findViewById(R.id.homeFragmentProgressBar);
@@ -122,61 +135,23 @@ public class MainActivity extends AppCompatActivity {
         homeFragmentText = findViewById(R.id.homeFragmentText);
         homeFragmentInternetText = findViewById(R.id.homeFragmentInternetText);
 
-        home_fragment_image = (ImageView)findViewById(R.id.home_fragment_image); //id for image
+        home_fragment_image = (ImageView) findViewById(R.id.home_fragment_image); //id for image
 
+        //if offline show error
+        if (!isNetworkAvailable()) {
+            homeFragmentInternetText.setVisibility(View.VISIBLE);//error text visible
 
-        //url for home page image
-        String url = "https://firebasestorage.googleapis.com/v0/b/bedi-hospital.appspot.com/o/home_page_image.jpg?alt=media&token=279f6483-4f86-47a6-9272-58d9bf61f679";
+        }
 
-        //using glide to load the url into image view
-        Glide.with(this)
-                .load(url)
-                .listener(new RequestListener<Drawable>() {//loading progress bar till the image loads
-                    @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-
-                        //on faliure dissmiss progress bar and toast the error
-                        homeFragmentProgressBar.setVisibility(View.GONE);
-
-                        //check for network availability
-                        if(isNetworkAvailable()) {
-                            //new way to toast
-                            Snackbar.make(homeFragmentFrameLayout, "Something went wrong", Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                        }
-                        //if not then show internet error message
-                        else {
-                            homeFragmentInternetText.setVisibility(View.VISIBLE);
-                        }
-
-
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-
-                       //on success dissmiss the progress bar
-                        homeFragmentProgressBar.setVisibility(View.GONE);
-
-                        //hide internet error message
-                        homeFragmentInternetText.setVisibility(View.GONE);
-
-                        //make text view and grid visible
-                        homeFragmentLinearLayoutGrid.setVisibility(View.VISIBLE);
-                        homeFragmentText.setVisibility(View.VISIBLE);
-                        return false;
-                    }
-                })
-                .thumbnail(0.5f).into(home_fragment_image);//using glide to bring home image
+        //navigation drawer fetch
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.openDrawer(Gravity.START);
 
         homeFragmentButtonClick(home_fragment_appointment, 1);//calling appointment fragment
         homeFragmentButtonClick(home_fragment_doctor, 2); //calling doctor fragment
         homeFragmentButtonClick(home_fragment_health, 3); //calling health fragment
         homeFragmentButtonClick(home_fragment_emergency, 4); //calling emergency fragment
 
-        //navigation drawer fetch
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -188,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
         nav_menu = navigationView.getMenu();
 
         mHandler = new Handler();
+
 
         // initializing navigation menu
         setUpNavigationView();
@@ -206,21 +182,28 @@ public class MainActivity extends AppCompatActivity {
         mRef = FirebaseDatabase.getInstance().getReference();
 
 
-
-
         Bundle bundle = getIntent().getExtras();
-        if(bundle !=  null) {
+        if (bundle != null) {
             String mainActivityMessage = bundle.getString("mainActivityMessage");
-            if(mainActivityMessage != null && mainActivityMessage.equals("coming from start activity to go to doctor activity")) {
+            String notificationMessage = bundle.getString("notificationMessage");
+            if (mainActivityMessage != null && mainActivityMessage.equals("coming from start activity to go to doctor activity")) {
 
                 Intent intent = new Intent(MainActivity.this, DoctorDetails.class);
                 intent.putExtra("mainActivity", "coming from main activity");
                 startActivity(intent);
                 finish();
             }
+            else if(notificationMessage != null && notificationMessage.equals("open profile fragment")) {
+                navItemIndex = 5;
+                CURRENT_TAG = TAG_PROFILE;
+                loadHomeFragment();
+
+                drawer.closeDrawers();
+            }
         }
 
     }//on create ends
+
 
     //onStart is used to dynamically load the contents
     @Override
@@ -233,7 +216,128 @@ public class MainActivity extends AppCompatActivity {
         loginLogoutFirebase();
     }
 
-    //internet connection check
+    private void startCheckNetwork() {
+        // Only one network checking thread can be run at the time.
+        if (!isCheckNetworkThreadActive) {
+            isCheckNetworkThreadActive = true;
+
+            Thread checkNetworkThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (isCheckNetworkThreadActive) {
+                        if (isNetworkAvailable()) {
+                            // Set UI if notwork is available
+                            setNetworkAvaiableUI();
+                        } else {
+                            // Set UI if notwork is not available
+                            setNetworkNotAvaiableUI();
+                        }
+
+                        // Sleep after finish checking network
+                        try {
+                            Thread.sleep(NETWORK_CHECK_INTERVAL);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+            checkNetworkThread.setName("Check Network Thread");
+            checkNetworkThread.start();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        // Start network checking when activity resumes
+        startCheckNetwork();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        // Stop network checking when activity pauses
+        stopCheckNetwork();
+        super.onPause();
+    }
+
+    private void setNetworkAvaiableUI() {
+        // If network avaible UI is not showing, we will change UI
+        if (!isNetworkAvaiableUIActive) {
+            isNetworkAvaiableUIActive = true;
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    // Update UI here when network is available.
+
+                    //url for home page image
+                    String url = "https://firebasestorage.googleapis.com/v0/b/bedi-hospital.appspot.com/o/home_page_image.jpg?alt=media&token=279f6483-4f86-47a6-9272-58d9bf61f679";
+
+                    //on success dissmiss the progress bar
+                    homeFragmentProgressBar.setVisibility(View.VISIBLE);
+                    //show internet error message
+                    homeFragmentInternetText.setVisibility(View.GONE);
+
+                    home_fragment_image.setVisibility(View.VISIBLE);
+
+                    Glide.with(MainActivity.this)
+                            .load(url)
+                            .listener(new RequestListener<Drawable>() {//loading progress bar till the image loads
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+
+                                    //on success dissmiss the progress bar
+                                    homeFragmentProgressBar.setVisibility(View.GONE);
+
+                                    //make text view and grid visible
+                                    homeFragmentLinearLayoutGrid.setVisibility(View.VISIBLE);
+                                    homeFragmentText.setVisibility(View.VISIBLE);
+                                    return false;
+                                }
+                            })
+                            .thumbnail(0.5f)
+                            .into(home_fragment_image);//using glide to bring home image
+
+
+                }
+            });
+        }
+    }
+
+    private void stopCheckNetwork() {
+        // This will break while loop of network checking thread.
+        isCheckNetworkThreadActive = false;
+    }
+
+    private void setNetworkNotAvaiableUI() {
+        // If network avaible UI is showing, we will change UI
+        if (isNetworkAvaiableUIActive) {
+            isNetworkAvaiableUIActive = false;
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    // Update UI here when network is unavailable.
+
+                    //show internet error message
+                    homeFragmentInternetText.setVisibility(View.VISIBLE);
+                    //on success dissmiss the progress bar
+                    homeFragmentProgressBar.setVisibility(View.GONE);
+
+                    home_fragment_image.setVisibility(View.GONE);
+                    //make text view and grid invisible
+                    homeFragmentLinearLayoutGrid.setVisibility(View.GONE);
+                    homeFragmentText.setVisibility(View.GONE);
+
+                }
+            });
+        }
+    }
+
+    //To verify network availability:
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -247,7 +351,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //Toast.makeText(MainActivity.this, "Injnjkb", Toast.LENGTH_SHORT).show();
-                switch (nav){
+                switch (nav) {
                     case 1:   //loads appointment fragment
                         navItemIndex = nav;
                         CURRENT_TAG = TAG_APPOINTMENT;
@@ -280,10 +384,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (firebaseUser != null) {
 
-           // Toast.makeText(this, "inside login and logot method", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(this, "inside login and logot method", Toast.LENGTH_SHORT).show();
 
             String email = firebaseUser.getEmail();
-            String name = firebaseUser.getDisplayName();
+            //Log.d( "loginLogoutFirebase: ", firebaseUser.g);
 
             for (UserInfo user : FirebaseAuth.getInstance().getCurrentUser().getProviderData()) {
 
@@ -292,7 +396,10 @@ public class MainActivity extends AppCompatActivity {
                     Uri imageUri = firebaseUser.getPhotoUrl();//getting image uri from firebase
                     Glide.with(this).load(imageUri.toString()).thumbnail(0.5f).into(userLogo);//using glide to bring image
 
+
+                    String name = firebaseUser.getDisplayName();
                     userName.setText(name);
+                    break;
                 }
                 //user whose email id not google
                 else {
@@ -328,7 +435,6 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
-
                 }
             }
 
@@ -343,19 +449,18 @@ public class MainActivity extends AppCompatActivity {
 
 
             //if user is logged in
-            nav_menu.findItem(R.id.nav_logoutAccount).setVisible(true);//logout visible
+            nav_menu.findItem(R.id.nav_profile).setVisible(true);//profile visible
             nav_menu.findItem(R.id.nav_loginAccount).setVisible(false);//login invisible
 
         } else {
             // if user is logged out
-            nav_menu.findItem(R.id.nav_logoutAccount).setVisible(false);//logout invisible
+            nav_menu.findItem(R.id.nav_profile).setVisible(false);//profile invisible
             nav_menu.findItem(R.id.nav_loginAccount).setVisible(true);//login visible (in case of skip and explore
 
-            userEmail.setVisibility(View.INVISIBLE);//email visibility gone
+            userEmail.setVisibility(View.GONE);//email visibility gone
             userName.setVisibility(View.GONE);//name visibility gone
         }
     }
-
 
 
     //physical back button control
@@ -393,7 +498,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //method called when main activity ersumes from login activity an it loads home fragment without any transition
+    //method called when main activity resumes from login activity an it loads home fragment without any transition
     private void loadHomeFragmentFromBackButton() {
 
         // selecting appropriate nav menu item
@@ -505,6 +610,10 @@ public class MainActivity extends AppCompatActivity {
                 // emergency fragment
                 return new EmergencyCallFragment();
 
+            case 5:
+                // emergency fragment
+                return new ProfileFragment();
+
             default:
                 return new HomeFragment();
         }
@@ -552,27 +661,44 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_share:
                         // launch new intent instead of loading fragment
 //                        startActivity(new Intent(MainActivity.this, AboutUsActivity.class));
-//                        drawer.closeDrawers();
-
+                        drawer.closeDrawers();
+                        navItemIndex = 5;
                         //sharing the app
+                        ApplicationInfo app = getApplicationContext().getApplicationInfo();
+                        String filePath = app.sourceDir;
+
                         Intent intent = new Intent(Intent.ACTION_SEND);
-                        intent.setType("text/plain");
-                        String link = "https://play.google.com/store?hl=en";
-                        intent.putExtra(Intent.EXTRA_TEXT, link);
+
+                        // MIME of .apk is "application/vnd.android.package-archive".
+                        // but Bluetooth does not accept this. Let's use "*/*" instead.
+                        intent.setType("*/*");
+
+                        // Only use Bluetooth to send .apk
+                        // intent.setPackage("com.android.bluetooth");
+
+                        //String link = "https://play.google.com/store?hl=en";
+                        //intent.putExtra(Intent.EXTRA_TEXT, link);
+                        // Append file and send Intent
+                        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePath)));
                         startActivity(Intent.createChooser(intent, "Share via"));
                         return true;
 
                     case R.id.nav_send:
+
+                        navItemIndex = 6;
                         // launch new intent instead of loading fragment
 //                        startActivity(new Intent(MainActivity.this, PrivacyPolicyActivity.class));
 //                        drawer.closeDrawers();
 //                        return true;
-                    case R.id.nav_logoutAccount:
-                        logout();
+                    case R.id.nav_profile:
+                        navItemIndex = 5;
+                        CURRENT_TAG = TAG_PROFILE;
                         break;
+
                     case R.id.nav_loginAccount:
                         login();
                         break;
+
                     default:
                         navItemIndex = 0;
                 }
@@ -606,32 +732,32 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, 1);
 
             }
-        }, 1000);
+        }, 500);
 
 
     }
 
-    private void logout() {
-
-        //show progress dialog
-        final ProgressDialog progressDialog = ProgressDialog.show(MainActivity.this, "Logout", "Please wait", true);
-        //delaying the process
+//    private void profile() {
+//
+//        //show progress dialog
+//        final ProgressDialog progressDialog = ProgressDialog.show(MainActivity.this, "Logout", "Please wait", true);
+//        //delaying the process
         final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //Do something after 100ms
-                startActivity(new Intent(MainActivity.this, StartActivity.class));
-                finishAffinity();
-                progressDialog.dismiss();
-            }
-        }, 1500);
-
-        FirebaseAuth.getInstance().signOut();//signing out
-
-        nav_menu.findItem(R.id.nav_logoutAccount).setVisible(false);// setting logout visibility
-        nav_menu.findItem(R.id.nav_loginAccount).setVisible(true);// setting login visibility
-    }
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                //Do something after 100ms
+//                startActivity(new Intent(MainActivity.this, StartActivity.class));
+//                finishAffinity();
+//                progressDialog.dismiss();
+//            }
+//        }, 1500);
+//
+//        FirebaseAuth.getInstance().signOut();//signing out
+//
+//        nav_menu.findItem(R.id.nav_logoutAccount).setVisible(false);// setting logout visibility
+//        nav_menu.findItem(R.id.nav_loginAccount).setVisible(true);// setting login visibility
+//    }
 
     //this method works when the activity resumes and we want to show home fragment on returning from activity on back button click
     @Override

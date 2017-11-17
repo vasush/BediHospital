@@ -1,7 +1,9 @@
 package com.bedihospital.bedihospital.Activity;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -16,6 +18,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -64,8 +67,9 @@ public class StartActivity extends AppCompatActivity implements
     EditText loginPassword;
     Button login_registerButton;
 
-    String email, password, userContact;//getting text from fields
-    boolean emailValid, passwordValid ;//validating details
+    String email, password;//getting text from fields
+    String userContact;
+    boolean emailValid, passwordValid;//validating details
     boolean contactReceived = false;
 
 
@@ -127,13 +131,7 @@ public class StartActivity extends AppCompatActivity implements
         googleSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                    contactDialogBox();
-
-//                    Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-//                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-//                    startActivityForResult(signInIntent, RC_SIGN_IN);
-
+                contactDialogBox();
             }
         });
 
@@ -248,6 +246,8 @@ public class StartActivity extends AppCompatActivity implements
         mBuilder.setView(mView);
         final AlertDialog alertDialog = mBuilder.create();
 
+        //alertDialog.setCancelable(false);
+
         dialogContactButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -257,7 +257,7 @@ public class StartActivity extends AppCompatActivity implements
                     //String contactRegex = "^[789]\d{9}$";
                     if (TextUtils.isEmpty(contact)) {
                         dialogContactInput.setError("Contact can't be empty");
-                    } else if (Pattern.matches("^[789]\\d{9}$", contact) && contact.length()==10) {
+                    } else if (Pattern.matches("^[789]\\d{9}$", contact) && contact.length() == 10) {
                         userContact = contact;
                         alertDialog.dismiss();
 
@@ -265,27 +265,26 @@ public class StartActivity extends AppCompatActivity implements
                         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                         startActivityForResult(signInIntent, RC_SIGN_IN);
 
+                        //addDetailsToDataBase();//adding google account login details to firebase database
+
+//                        if (bookAppointmentMessage != null && bookAppointmentMessage.equals("coming from doctor detail")) {
+//                            //skipExplore.setVisibility(View.GONE);
+//
+//                            //starting main activity on success
+//                            Intent intent = new Intent(StartActivity.this, DoctorDetails.class);
+//                            intent.putExtra("mainActivityMessage", "coming from start activity to go to doctor activity");
+//                            startActivity(intent);
+//                            finish();
+//                        } else {
+//                            //starting main activity on success
+//                            startActivity(new Intent(StartActivity.this, MainActivity.class));
+//                        }
+
+
                     } else {
                         dialogContactInput.setError("Invalid contact");
                         contactReceived = false;
                     }
-
-
-//                    addDetailsToDataBase();//adding google account login details to firebase database
-//
-//                    //if value matches doctor activity value then hide skip and explore
-//                    if (bookAppointmentMessage != null && bookAppointmentMessage.equals("coming from doctor detail")) {
-//                        //skipExplore.setVisibility(View.GONE);
-//
-//                        //starting main activity on success
-//                        Intent intent = new Intent(StartActivity.this, DoctorDetails.class);
-//                        intent.putExtra("mainActivityMessage", "coming from start activity to go to doctor activity");
-//                        startActivity(intent);
-//                        finish();
-//                    } else {
-//                        //starting main activity on success
-//                        startActivity(new Intent(StartActivity.this, MainActivity.class));
-//                    }
 
 
                 } else {
@@ -353,10 +352,8 @@ public class StartActivity extends AppCompatActivity implements
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
 
-                           // contactDialogBox();
-                            addDetailsToDataBase();//adding google account login details to firebase database
+                            addDetailsToDataBase();
 
-                            //if value matches doctor activity value then hide skip and explore
                             if (bookAppointmentMessage != null && bookAppointmentMessage.equals("coming from doctor detail")) {
                                 //skipExplore.setVisibility(View.GONE);
 
@@ -369,6 +366,20 @@ public class StartActivity extends AppCompatActivity implements
                                 //starting main activity on success
                                 startActivity(new Intent(StartActivity.this, MainActivity.class));
                             }
+
+                            //if value matches doctor activity value then hide skip and explore
+//                            if (bookAppointmentMessage != null && bookAppointmentMessage.equals("coming from doctor detail")) {
+//                                //skipExplore.setVisibility(View.GONE);
+//
+//                                //starting main activity on success
+//                                Intent intent = new Intent(StartActivity.this, DoctorDetails.class);
+//                                intent.putExtra("mainActivityMessage", "coming from start activity to go to doctor activity");
+//                                startActivity(intent);
+//                                finish();
+//                            } else {
+//                                //starting main activity on success
+//                                startActivity(new Intent(StartActivity.this, MainActivity.class));
+//                            }
 
                         } else {
                             if (isNetworkAvailable()) {
